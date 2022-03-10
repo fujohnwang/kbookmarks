@@ -1,2 +1,571 @@
-var app=function(){"use strict";function t(){}function e(t){return t()}function n(){return Object.create(null)}function o(t){t.forEach(e)}function r(t){return"function"==typeof t}function c(t,e){return t!=t?e==e:t!==e||t&&"object"==typeof t||"function"==typeof t}function a(t,e){t.appendChild(e)}function l(t){t.parentNode.removeChild(t)}function s(t){return document.createElement(t)}function u(){return t=" ",document.createTextNode(t);var t}function i(t,e,n){null==n?t.removeAttribute(e):t.getAttribute(e)!==n&&t.setAttribute(e,n)}let f;function d(t){f=t}const p=[],m=[],h=[],$=[],b=Promise.resolve();let x=!1;function g(t){h.push(t)}const y=new Set;let _=0;function v(){const t=f;do{for(;_<p.length;){const t=p[_];_++,d(t),w(t.$$)}for(d(null),p.length=0,_=0;m.length;)m.pop()();for(let t=0;t<h.length;t+=1){const e=h[t];y.has(e)||(y.add(e),e())}h.length=0}while(p.length);for(;$.length;)$.pop()();x=!1,y.clear(),d(t)}function w(t){if(null!==t.fragment){t.update(),o(t.before_update);const e=t.dirty;t.dirty=[-1],t.fragment&&t.fragment.p(t.ctx,e),t.after_update.forEach(g)}}const k=new Set;function E(t,e){-1===t.$$.dirty[0]&&(p.push(t),x||(x=!0,b.then(v)),t.$$.dirty.fill(0)),t.$$.dirty[e/31|0]|=1<<e%31}function C(c,a,s,u,i,p,m,h=[-1]){const $=f;d(c);const b=c.$$={fragment:null,ctx:null,props:p,update:t,not_equal:i,bound:n(),on_mount:[],on_destroy:[],on_disconnect:[],before_update:[],after_update:[],context:new Map(a.context||($?$.$$.context:[])),callbacks:n(),dirty:h,skip_bound:!1,root:a.target||$.$$.root};m&&m(b.root);let x=!1;if(b.ctx=s?s(c,a.props||{},((t,e,...n)=>{const o=n.length?n[0]:e;return b.ctx&&i(b.ctx[t],b.ctx[t]=o)&&(!b.skip_bound&&b.bound[t]&&b.bound[t](o),x&&E(c,t)),e})):[],b.update(),x=!0,o(b.before_update),b.fragment=!!u&&u(b.ctx),a.target){if(a.hydrate){const t=function(t){return Array.from(t.childNodes)}(a.target);b.fragment&&b.fragment.l(t),t.forEach(l)}else b.fragment&&b.fragment.c();a.intro&&((y=c.$$.fragment)&&y.i&&(k.delete(y),y.i(_))),function(t,n,c,a){const{fragment:l,on_mount:s,on_destroy:u,after_update:i}=t.$$;l&&l.m(n,c),a||g((()=>{const n=s.map(e).filter(r);u?u.push(...n):o(n),t.$$.on_mount=[]})),i.forEach(g)}(c,a.target,a.anchor,a.customElement),v()}var y,_;d($)}function T(e){let n,o,r,c,f,d,p,m,h,$,b,x,g,y;return{c(){n=s("main"),o=s("div"),r=s("h1"),r.textContent="Save Bookmark",c=u(),f=s("div"),f.innerHTML='<label class="label" for="title"><span class="label-text">Title</span></label> \n            <input id="title" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs"/>',d=u(),p=s("div"),p.innerHTML='<label class="label" for="comment"><span class="label-text">Comment</span></label> \n            <textarea id="comment" placeholder="Type here" class="textarea h-36 border-accent"></textarea>',m=u(),h=s("div"),$=s("button"),$.textContent="Save",b=u(),x=s("button"),x.textContent="Cancel",i(r,"class","text-3xl font-extrabold text-accent"),i(f,"class","form-control w-full max-w-xs"),i(p,"class","form-control w-full max-w-xs"),i($,"class","btn w-24"),i(x,"class","btn w-24"),i(h,"class","mt-3 space-x-3"),i(o,"class","container mx-auto m-3")},m(t,e){var l,s,u,i;!function(t,e,n){t.insertBefore(e,n||null)}(t,n,e),a(n,o),a(o,r),a(o,c),a(o,f),a(o,d),a(o,p),a(o,m),a(o,h),a(h,$),a(h,b),a(h,x),g||(s="click",u=A,(l=x).addEventListener(s,u,i),y=()=>l.removeEventListener(s,u,i),g=!0)},p:t,i:t,o:t,d(t){t&&l(n),g=!1,y()}}}function A(){window.close()}return new class extends class{$destroy(){!function(t,e){const n=t.$$;null!==n.fragment&&(o(n.on_destroy),n.fragment&&n.fragment.d(e),n.on_destroy=n.fragment=null,n.ctx=[])}(this,1),this.$destroy=t}$on(t,e){const n=this.$$.callbacks[t]||(this.$$.callbacks[t]=[]);return n.push(e),()=>{const t=n.indexOf(e);-1!==t&&n.splice(t,1)}}$set(t){var e;this.$$set&&(e=t,0!==Object.keys(e).length)&&(this.$$.skip_bound=!0,this.$$set(t),this.$$.skip_bound=!1)}}{constructor(t){super(),C(this,t,null,T,c,{})}}({target:document.body,props:{name:"world"}})}();
+
+(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
+var app = (function () {
+    'use strict';
+
+    function noop() { }
+    function add_location(element, file, line, column, char) {
+        element.__svelte_meta = {
+            loc: { file, line, column, char }
+        };
+    }
+    function run(fn) {
+        return fn();
+    }
+    function blank_object() {
+        return Object.create(null);
+    }
+    function run_all(fns) {
+        fns.forEach(run);
+    }
+    function is_function(thing) {
+        return typeof thing === 'function';
+    }
+    function safe_not_equal(a, b) {
+        return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
+    }
+    function is_empty(obj) {
+        return Object.keys(obj).length === 0;
+    }
+    function action_destroyer(action_result) {
+        return action_result && is_function(action_result.destroy) ? action_result.destroy : noop;
+    }
+    function append(target, node) {
+        target.appendChild(node);
+    }
+    function insert(target, node, anchor) {
+        target.insertBefore(node, anchor || null);
+    }
+    function detach(node) {
+        node.parentNode.removeChild(node);
+    }
+    function element(name) {
+        return document.createElement(name);
+    }
+    function text(data) {
+        return document.createTextNode(data);
+    }
+    function space() {
+        return text(' ');
+    }
+    function listen(node, event, handler, options) {
+        node.addEventListener(event, handler, options);
+        return () => node.removeEventListener(event, handler, options);
+    }
+    function attr(node, attribute, value) {
+        if (value == null)
+            node.removeAttribute(attribute);
+        else if (node.getAttribute(attribute) !== value)
+            node.setAttribute(attribute, value);
+    }
+    function children(element) {
+        return Array.from(element.childNodes);
+    }
+    function custom_event(type, detail, bubbles = false) {
+        const e = document.createEvent('CustomEvent');
+        e.initCustomEvent(type, bubbles, false, detail);
+        return e;
+    }
+
+    let current_component;
+    function set_current_component(component) {
+        current_component = component;
+    }
+    function get_current_component() {
+        if (!current_component)
+            throw new Error('Function called outside component initialization');
+        return current_component;
+    }
+    function onMount(fn) {
+        get_current_component().$$.on_mount.push(fn);
+    }
+
+    const dirty_components = [];
+    const binding_callbacks = [];
+    const render_callbacks = [];
+    const flush_callbacks = [];
+    const resolved_promise = Promise.resolve();
+    let update_scheduled = false;
+    function schedule_update() {
+        if (!update_scheduled) {
+            update_scheduled = true;
+            resolved_promise.then(flush);
+        }
+    }
+    function add_render_callback(fn) {
+        render_callbacks.push(fn);
+    }
+    // flush() calls callbacks in this order:
+    // 1. All beforeUpdate callbacks, in order: parents before children
+    // 2. All bind:this callbacks, in reverse order: children before parents.
+    // 3. All afterUpdate callbacks, in order: parents before children. EXCEPT
+    //    for afterUpdates called during the initial onMount, which are called in
+    //    reverse order: children before parents.
+    // Since callbacks might update component values, which could trigger another
+    // call to flush(), the following steps guard against this:
+    // 1. During beforeUpdate, any updated components will be added to the
+    //    dirty_components array and will cause a reentrant call to flush(). Because
+    //    the flush index is kept outside the function, the reentrant call will pick
+    //    up where the earlier call left off and go through all dirty components. The
+    //    current_component value is saved and restored so that the reentrant call will
+    //    not interfere with the "parent" flush() call.
+    // 2. bind:this callbacks cannot trigger new flush() calls.
+    // 3. During afterUpdate, any updated components will NOT have their afterUpdate
+    //    callback called a second time; the seen_callbacks set, outside the flush()
+    //    function, guarantees this behavior.
+    const seen_callbacks = new Set();
+    let flushidx = 0; // Do *not* move this inside the flush() function
+    function flush() {
+        const saved_component = current_component;
+        do {
+            // first, call beforeUpdate functions
+            // and update components
+            while (flushidx < dirty_components.length) {
+                const component = dirty_components[flushidx];
+                flushidx++;
+                set_current_component(component);
+                update(component.$$);
+            }
+            set_current_component(null);
+            dirty_components.length = 0;
+            flushidx = 0;
+            while (binding_callbacks.length)
+                binding_callbacks.pop()();
+            // then, once components are updated, call
+            // afterUpdate functions. This may cause
+            // subsequent updates...
+            for (let i = 0; i < render_callbacks.length; i += 1) {
+                const callback = render_callbacks[i];
+                if (!seen_callbacks.has(callback)) {
+                    // ...so guard against infinite loops
+                    seen_callbacks.add(callback);
+                    callback();
+                }
+            }
+            render_callbacks.length = 0;
+        } while (dirty_components.length);
+        while (flush_callbacks.length) {
+            flush_callbacks.pop()();
+        }
+        update_scheduled = false;
+        seen_callbacks.clear();
+        set_current_component(saved_component);
+    }
+    function update($$) {
+        if ($$.fragment !== null) {
+            $$.update();
+            run_all($$.before_update);
+            const dirty = $$.dirty;
+            $$.dirty = [-1];
+            $$.fragment && $$.fragment.p($$.ctx, dirty);
+            $$.after_update.forEach(add_render_callback);
+        }
+    }
+    const outroing = new Set();
+    function transition_in(block, local) {
+        if (block && block.i) {
+            outroing.delete(block);
+            block.i(local);
+        }
+    }
+    function mount_component(component, target, anchor, customElement) {
+        const { fragment, on_mount, on_destroy, after_update } = component.$$;
+        fragment && fragment.m(target, anchor);
+        if (!customElement) {
+            // onMount happens before the initial afterUpdate
+            add_render_callback(() => {
+                const new_on_destroy = on_mount.map(run).filter(is_function);
+                if (on_destroy) {
+                    on_destroy.push(...new_on_destroy);
+                }
+                else {
+                    // Edge case - component was destroyed immediately,
+                    // most likely as a result of a binding initialising
+                    run_all(new_on_destroy);
+                }
+                component.$$.on_mount = [];
+            });
+        }
+        after_update.forEach(add_render_callback);
+    }
+    function destroy_component(component, detaching) {
+        const $$ = component.$$;
+        if ($$.fragment !== null) {
+            run_all($$.on_destroy);
+            $$.fragment && $$.fragment.d(detaching);
+            // TODO null out other refs, including component.$$ (but need to
+            // preserve final state?)
+            $$.on_destroy = $$.fragment = null;
+            $$.ctx = [];
+        }
+    }
+    function make_dirty(component, i) {
+        if (component.$$.dirty[0] === -1) {
+            dirty_components.push(component);
+            schedule_update();
+            component.$$.dirty.fill(0);
+        }
+        component.$$.dirty[(i / 31) | 0] |= (1 << (i % 31));
+    }
+    function init(component, options, instance, create_fragment, not_equal, props, append_styles, dirty = [-1]) {
+        const parent_component = current_component;
+        set_current_component(component);
+        const $$ = component.$$ = {
+            fragment: null,
+            ctx: null,
+            // state
+            props,
+            update: noop,
+            not_equal,
+            bound: blank_object(),
+            // lifecycle
+            on_mount: [],
+            on_destroy: [],
+            on_disconnect: [],
+            before_update: [],
+            after_update: [],
+            context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
+            // everything else
+            callbacks: blank_object(),
+            dirty,
+            skip_bound: false,
+            root: options.target || parent_component.$$.root
+        };
+        append_styles && append_styles($$.root);
+        let ready = false;
+        $$.ctx = instance
+            ? instance(component, options.props || {}, (i, ret, ...rest) => {
+                const value = rest.length ? rest[0] : ret;
+                if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
+                    if (!$$.skip_bound && $$.bound[i])
+                        $$.bound[i](value);
+                    if (ready)
+                        make_dirty(component, i);
+                }
+                return ret;
+            })
+            : [];
+        $$.update();
+        ready = true;
+        run_all($$.before_update);
+        // `false` as a special case of no DOM component
+        $$.fragment = create_fragment ? create_fragment($$.ctx) : false;
+        if (options.target) {
+            if (options.hydrate) {
+                const nodes = children(options.target);
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                $$.fragment && $$.fragment.l(nodes);
+                nodes.forEach(detach);
+            }
+            else {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                $$.fragment && $$.fragment.c();
+            }
+            if (options.intro)
+                transition_in(component.$$.fragment);
+            mount_component(component, options.target, options.anchor, options.customElement);
+            flush();
+        }
+        set_current_component(parent_component);
+    }
+    /**
+     * Base class for Svelte components. Used when dev=false.
+     */
+    class SvelteComponent {
+        $destroy() {
+            destroy_component(this, 1);
+            this.$destroy = noop;
+        }
+        $on(type, callback) {
+            const callbacks = (this.$$.callbacks[type] || (this.$$.callbacks[type] = []));
+            callbacks.push(callback);
+            return () => {
+                const index = callbacks.indexOf(callback);
+                if (index !== -1)
+                    callbacks.splice(index, 1);
+            };
+        }
+        $set($$props) {
+            if (this.$$set && !is_empty($$props)) {
+                this.$$.skip_bound = true;
+                this.$$set($$props);
+                this.$$.skip_bound = false;
+            }
+        }
+    }
+
+    function dispatch_dev(type, detail) {
+        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.46.4' }, detail), true));
+    }
+    function append_dev(target, node) {
+        dispatch_dev('SvelteDOMInsert', { target, node });
+        append(target, node);
+    }
+    function insert_dev(target, node, anchor) {
+        dispatch_dev('SvelteDOMInsert', { target, node, anchor });
+        insert(target, node, anchor);
+    }
+    function detach_dev(node) {
+        dispatch_dev('SvelteDOMRemove', { node });
+        detach(node);
+    }
+    function listen_dev(node, event, handler, options, has_prevent_default, has_stop_propagation) {
+        const modifiers = options === true ? ['capture'] : options ? Array.from(Object.keys(options)) : [];
+        if (has_prevent_default)
+            modifiers.push('preventDefault');
+        if (has_stop_propagation)
+            modifiers.push('stopPropagation');
+        dispatch_dev('SvelteDOMAddEventListener', { node, event, handler, modifiers });
+        const dispose = listen(node, event, handler, options);
+        return () => {
+            dispatch_dev('SvelteDOMRemoveEventListener', { node, event, handler, modifiers });
+            dispose();
+        };
+    }
+    function attr_dev(node, attribute, value) {
+        attr(node, attribute, value);
+        if (value == null)
+            dispatch_dev('SvelteDOMRemoveAttribute', { node, attribute });
+        else
+            dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
+    }
+    function validate_slots(name, slot, keys) {
+        for (const slot_key of Object.keys(slot)) {
+            if (!~keys.indexOf(slot_key)) {
+                console.warn(`<${name}> received an unexpected slot "${slot_key}".`);
+            }
+        }
+    }
+    /**
+     * Base class for Svelte components with some minor dev-enhancements. Used when dev=true.
+     */
+    class SvelteComponentDev extends SvelteComponent {
+        constructor(options) {
+            if (!options || (!options.target && !options.$$inline)) {
+                throw new Error("'target' is a required option");
+            }
+            super();
+        }
+        $destroy() {
+            super.$destroy();
+            this.$destroy = () => {
+                console.warn('Component was already destroyed'); // eslint-disable-line no-console
+            };
+        }
+        $capture_state() { }
+        $inject_state() { }
+    }
+
+    /* src/App.svelte generated by Svelte v3.46.4 */
+    const file = "src/App.svelte";
+
+    function create_fragment(ctx) {
+    	let section;
+    	let div8;
+    	let div0;
+    	let h1;
+    	let t1;
+    	let div7;
+    	let div6;
+    	let div2;
+    	let div1;
+    	let label0;
+    	let span0;
+    	let t3;
+    	let input;
+    	let t4;
+    	let div4;
+    	let div3;
+    	let label1;
+    	let span1;
+    	let t6;
+    	let textarea;
+    	let t7;
+    	let div5;
+    	let button;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			section = element("section");
+    			div8 = element("div");
+    			div0 = element("div");
+    			h1 = element("h1");
+    			h1.textContent = "Save Bookmark";
+    			t1 = space();
+    			div7 = element("div");
+    			div6 = element("div");
+    			div2 = element("div");
+    			div1 = element("div");
+    			label0 = element("label");
+    			span0 = element("span");
+    			span0.textContent = "Title";
+    			t3 = space();
+    			input = element("input");
+    			t4 = space();
+    			div4 = element("div");
+    			div3 = element("div");
+    			label1 = element("label");
+    			span1 = element("span");
+    			span1.textContent = "Comment";
+    			t6 = space();
+    			textarea = element("textarea");
+    			t7 = space();
+    			div5 = element("div");
+    			button = element("button");
+    			button.textContent = "Save";
+    			attr_dev(h1, "class", "text-3xl font-extrabold text-accent");
+    			add_location(h1, file, 26, 12, 644);
+    			attr_dev(div0, "class", "flex flex-col text-center w-full");
+    			add_location(div0, file, 25, 8, 585);
+    			attr_dev(span0, "class", "label-text");
+    			add_location(span0, file, 33, 28, 1001);
+    			attr_dev(label0, "class", "label");
+    			attr_dev(label0, "for", "title");
+    			add_location(label0, file, 32, 24, 939);
+    			attr_dev(input, "id", "title");
+    			attr_dev(input, "type", "text");
+    			attr_dev(input, "placeholder", "Type here");
+    			attr_dev(input, "class", "input border-accent w-full");
+    			add_location(input, file, 35, 24, 1096);
+    			attr_dev(div1, "class", "form-control w-full");
+    			add_location(div1, file, 31, 20, 881);
+    			attr_dev(div2, "class", "p-2 w-full");
+    			add_location(div2, file, 30, 16, 836);
+    			attr_dev(span1, "class", "label-text");
+    			add_location(span1, file, 42, 28, 1463);
+    			attr_dev(label1, "class", "label");
+    			attr_dev(label1, "for", "comment");
+    			add_location(label1, file, 41, 24, 1399);
+    			attr_dev(textarea, "id", "comment");
+    			attr_dev(textarea, "placeholder", "Type here");
+    			attr_dev(textarea, "class", "textarea h-36 border-accent");
+    			add_location(textarea, file, 44, 24, 1560);
+    			attr_dev(div3, "class", "form-control w-full");
+    			add_location(div3, file, 40, 20, 1341);
+    			attr_dev(div4, "class", "p-2 w-full");
+    			add_location(div4, file, 39, 16, 1296);
+    			attr_dev(button, "class", "btn w-24");
+    			add_location(button, file, 48, 20, 1764);
+    			attr_dev(div5, "class", "mt-3 space-x-3 p-2");
+    			add_location(div5, file, 47, 16, 1711);
+    			attr_dev(div6, "class", "flex flex-wrap -m-2");
+    			add_location(div6, file, 29, 12, 786);
+    			attr_dev(div7, "class", "lg:w-1/2 md:w-2/3 mx-auto");
+    			add_location(div7, file, 28, 8, 734);
+    			attr_dev(div8, "class", "container px-5 py-5 mx-auto");
+    			add_location(div8, file, 24, 4, 535);
+    			attr_dev(section, "class", "text-gray-600 body-font relative");
+    			add_location(section, file, 23, 0, 480);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, section, anchor);
+    			append_dev(section, div8);
+    			append_dev(div8, div0);
+    			append_dev(div0, h1);
+    			append_dev(div8, t1);
+    			append_dev(div8, div7);
+    			append_dev(div7, div6);
+    			append_dev(div6, div2);
+    			append_dev(div2, div1);
+    			append_dev(div1, label0);
+    			append_dev(label0, span0);
+    			append_dev(div1, t3);
+    			append_dev(div1, input);
+    			append_dev(div6, t4);
+    			append_dev(div6, div4);
+    			append_dev(div4, div3);
+    			append_dev(div3, label1);
+    			append_dev(label1, span1);
+    			append_dev(div3, t6);
+    			append_dev(div3, textarea);
+    			append_dev(div6, t7);
+    			append_dev(div6, div5);
+    			append_dev(div5, button);
+
+    			if (!mounted) {
+    				dispose = [
+    					action_destroyer(setTitle.call(null, input)),
+    					listen_dev(button, "click", save, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(section);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function save() {
+    	// save bookmark and then
+    	chrome.runtime.sendMessage({}).then(v => window.close());
+    }
+
+    // let titleF;
+    //
+    // onMount(()=> {
+    //     titleF.value = document.title;
+    // })
+    function setTitle(e) {
+    	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    		let tab = tabs[0];
+    		e.value = tab.title;
+    	});
+    }
+
+    function instance($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('App', slots, []);
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<App> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$capture_state = () => ({ onMount, save, setTitle });
+    	return [];
+    }
+
+    class App extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance, create_fragment, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "App",
+    			options,
+    			id: create_fragment.name
+    		});
+    	}
+    }
+
+    const app = new App({
+    	target: document.body
+    });
+
+    return app;
+
+})();
 //# sourceMappingURL=bundle.js.map
