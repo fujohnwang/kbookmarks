@@ -2,6 +2,16 @@
 
 chrome bookmark extension from keevol.com
 
+# quick start
+
+1. clone this repo to local;
+2. open chrome extensions settings: `chrome://extensions` and swith on "Developer Mode" 
+![](images/63621646919261_.pic.jpg)
+3. open `public` folder by clicking "Load unpacked" button 
+![](images/63631646919286_.pic.jpg)
+4. You can enjoy this extension now.
+
+
 # TODO
 
 - [X] remove redundancy of bookmark items
