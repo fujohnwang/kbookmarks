@@ -1,21 +1,16 @@
 <script>
-    import {onMount} from 'svelte';
+    let title = "";
+    let comment = "";
 
     function save() {
         // save bookmark and then
-        chrome.runtime.sendMessage({}).then((v) => window.close());
+        chrome.runtime.sendMessage({"title": title, "comment": comment}).then((v) => window.close());
     }
-
-    // let titleF;
-    //
-    // onMount(()=> {
-    //     titleF.value = document.title;
-    // })
 
     function setTitle(e) {
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             let tab = tabs[0];
-            e.value = tab.title;
+            title = tab.title;
         });
     }
 
@@ -33,7 +28,7 @@
                         <label class="label" for="title">
                             <span class="label-text">Title</span>
                         </label>
-                        <input id="title" type="text" placeholder="Type here" class="input border-accent w-full"
+                        <input id="title" type="text" placeholder="Type here" class="input w-full" bind:value={title}
                                use:setTitle>
                     </div>
                 </div>
@@ -42,7 +37,10 @@
                         <label class="label" for="comment">
                             <span class="label-text">Comment</span>
                         </label>
-                        <textarea id="comment" placeholder="Type here" class="textarea h-36 border-accent"/>
+                        <!-- svelte-ignore a11y-autofocus -->
+                        <textarea id="comment"
+                                  placeholder="add keywords or anything seperated by space you would like to recall in your memory"
+                                  class="textarea h-36 " bind:value={comment} autofocus/>
                     </div>
                 </div>
                 <div class="mt-3 space-x-3 p-2">
