@@ -1,0 +1,19 @@
+{
+  "name": "kBookmark",
+  "manifest_version": 3,
+  "version": "0.1",
+  "author": "fujohnwang",
+  "description": "bookmark from keevol",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "bookmarks"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": "favicon.png"
+  }
+}

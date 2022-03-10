@@ -1,12 +1,34 @@
 <script>
-	export let name;
+
 </script>
 
 <main>
-	<div class="container mx-auto mt-24">
-		<h1 class="text-9xl font-extrabold text-red-900">Hello {name}!</h1>
-		<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-		<input type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs p-3 mt-3">
+	<div class="container mx-auto m-3">
+		<h1 class="text-3xl font-extrabold text-accent">Save Bookmark</h1>
+
+		<div class="form-control w-full max-w-xs">
+			<label class="label" for="title">
+				<span class="label-text">Title</span>
+			</label>
+			<input id="title" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs">
+		</div>
+
+<!--		<div class="form-control w-full max-w-xs">-->
+<!--			<label class="label">-->
+<!--				<span class="label-text">URL</span>-->
+<!--			</label>-->
+<!--			<input type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs">-->
+<!--		</div>-->
+		<div class="form-control w-full max-w-xs">
+			<label class="label" for="comment">
+				<span class="label-text">Comment</span>
+			</label>
+			<textarea id="comment" placeholder="Type here" class="textarea h-36 border-accent"/>
+		</div>
+		<div class="mt-3 space-x-3">
+			<button class="btn w-24">Save</button>
+			<button class="btn w-24">Cancel</button>
+		</div>
 	</div>
 </main>
 
