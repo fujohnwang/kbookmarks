@@ -7,6 +7,7 @@ chrome bookmark extension from keevol.com
 - [X] remove redundancy of bookmark items
     - update instead of add when same title & same url
 - [ ] enrich metadata to bookmark with indexedDB
+- [ ] add override page to allow users to search and access enriched bookmarks
 
 # code snippets
 
