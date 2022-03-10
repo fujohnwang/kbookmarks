@@ -4,7 +4,7 @@ chrome bookmark extension from keevol.com
 
 # quick start
 
-1. clone this repo to local;
+1. clone this repo to local: `git clone git@github.com:fujohnwang/kbookmark.git`
 2. open chrome extensions settings: `chrome://extensions` and swith on "Developer Mode" 
 ![](images/63621646919261_.pic.jpg)
 3. open `public` folder by clicking "Load unpacked" button 
