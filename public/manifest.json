@@ -9,7 +9,8 @@
     "activeTab",
     "tabs",
     "scripting",
-    "bookmarks"
+    "bookmarks",
+    "notifications"
   ],
   "background": {
     "service_worker": "background.js"

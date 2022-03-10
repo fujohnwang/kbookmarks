@@ -4,7 +4,19 @@
 
     function save() {
         // save bookmark and then
-        chrome.runtime.sendMessage({"title": title, "comment": comment}).then((v) => window.close());
+        chrome.runtime.sendMessage({"title": title, "comment": comment}).then((v) => {
+            window.close();
+
+            chrome.notifications.create('kBookmarkNotification', {
+                title: "Success",
+                message: "bookmark added successfully.",
+                iconUrl: "favicon.png",
+                type: 'basic',
+                priority: 2
+            }, function(id){
+
+            })
+        });
     }
 
     function setTitle(e) {
@@ -19,7 +31,7 @@
 <section class="text-gray-600 body-font relative">
     <div class="container px-5 py-5 mx-auto">
         <div class="flex flex-col text-center w-full">
-            <h1 class="text-3xl font-extrabold text-accent">Save Bookmark</h1>
+            <h1 class="text-3xl font-extrabold text-primary">Save Bookmark</h1>
         </div>
         <div class="lg:w-1/2 md:w-2/3 mx-auto">
             <div class="flex flex-wrap -m-2">
@@ -43,8 +55,8 @@
                                   class="textarea h-36 " bind:value={comment} autofocus/>
                     </div>
                 </div>
-                <div class="mt-3 space-x-3 p-2">
-                    <button class="btn w-24" on:click={save}>Save</button>
+                <div class="p-2 w-full">
+                    <button class="btn btn-block" on:click={save}>Save</button>
                 </div>
             </div>
         </div>

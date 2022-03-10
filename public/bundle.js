@@ -411,50 +411,50 @@ var app = (function () {
     			div5 = element("div");
     			button = element("button");
     			button.textContent = "Save";
-    			attr_dev(h1, "class", "text-3xl font-extrabold text-accent");
-    			add_location(h1, file, 21, 12, 581);
+    			attr_dev(h1, "class", "text-3xl font-extrabold text-primary");
+    			add_location(h1, file, 33, 12, 909);
     			attr_dev(div0, "class", "flex flex-col text-center w-full");
-    			add_location(div0, file, 20, 8, 522);
+    			add_location(div0, file, 32, 8, 850);
     			attr_dev(span0, "class", "label-text");
-    			add_location(span0, file, 28, 28, 938);
+    			add_location(span0, file, 40, 28, 1267);
     			attr_dev(label0, "class", "label");
     			attr_dev(label0, "for", "title");
-    			add_location(label0, file, 27, 24, 876);
+    			add_location(label0, file, 39, 24, 1205);
     			attr_dev(input, "id", "title");
     			attr_dev(input, "type", "text");
     			attr_dev(input, "placeholder", "Type here");
     			attr_dev(input, "class", "input w-full");
-    			add_location(input, file, 30, 24, 1033);
+    			add_location(input, file, 42, 24, 1362);
     			attr_dev(div1, "class", "form-control w-full");
-    			add_location(div1, file, 26, 20, 818);
+    			add_location(div1, file, 38, 20, 1147);
     			attr_dev(div2, "class", "p-2 w-full");
-    			add_location(div2, file, 25, 16, 773);
+    			add_location(div2, file, 37, 16, 1102);
     			attr_dev(span1, "class", "label-text");
-    			add_location(span1, file, 37, 28, 1405);
+    			add_location(span1, file, 49, 28, 1734);
     			attr_dev(label1, "class", "label");
     			attr_dev(label1, "for", "comment");
-    			add_location(label1, file, 36, 24, 1341);
+    			add_location(label1, file, 48, 24, 1670);
     			attr_dev(textarea, "id", "comment");
     			attr_dev(textarea, "placeholder", "add keywords or anything seperated by space you would like to recall in your memory");
     			attr_dev(textarea, "class", "textarea h-36 ");
     			textarea.autofocus = true;
-    			add_location(textarea, file, 40, 24, 1564);
+    			add_location(textarea, file, 52, 24, 1893);
     			attr_dev(div3, "class", "form-control w-full");
-    			add_location(div3, file, 35, 20, 1283);
+    			add_location(div3, file, 47, 20, 1612);
     			attr_dev(div4, "class", "p-2 w-full");
-    			add_location(div4, file, 34, 16, 1238);
-    			attr_dev(button, "class", "btn w-24");
-    			add_location(button, file, 46, 20, 1928);
-    			attr_dev(div5, "class", "mt-3 space-x-3 p-2");
-    			add_location(div5, file, 45, 16, 1875);
+    			add_location(div4, file, 46, 16, 1567);
+    			attr_dev(button, "class", "btn btn-block");
+    			add_location(button, file, 58, 20, 2249);
+    			attr_dev(div5, "class", "p-2 w-full");
+    			add_location(div5, file, 57, 16, 2204);
     			attr_dev(div6, "class", "flex flex-wrap -m-2");
-    			add_location(div6, file, 24, 12, 723);
+    			add_location(div6, file, 36, 12, 1052);
     			attr_dev(div7, "class", "lg:w-1/2 md:w-2/3 mx-auto");
-    			add_location(div7, file, 23, 8, 671);
+    			add_location(div7, file, 35, 8, 1000);
     			attr_dev(div8, "class", "container px-5 py-5 mx-auto");
-    			add_location(div8, file, 19, 4, 472);
+    			add_location(div8, file, 31, 4, 800);
     			attr_dev(section, "class", "text-gray-600 body-font relative");
-    			add_location(section, file, 18, 0, 417);
+    			add_location(section, file, 30, 0, 745);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -535,7 +535,23 @@ var app = (function () {
 
     	function save() {
     		// save bookmark and then
-    		chrome.runtime.sendMessage({ title, comment }).then(v => window.close());
+    		chrome.runtime.sendMessage({ title, comment }).then(v => {
+    			window.close();
+
+    			chrome.notifications.create(
+    				'kBookmarkNotification',
+    				{
+    					title: "Success",
+    					message: "bookmark added successfully.",
+    					iconUrl: "favicon.png",
+    					type: 'basic',
+    					priority: 2
+    				},
+    				function (id) {
+    					
+    				}
+    			);
+    		});
     	}
 
     	function setTitle(e) {
