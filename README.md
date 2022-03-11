@@ -4,8 +4,13 @@ chrome bookmark extension from keevol.com
 
 ![](public/icon.jpg)
 
-## how it looks (revision 0.1.1)
+## how it looks 
 
+The original (v0.0.1)
+![](images/63541646913106_.pic.jpg)
+
+
+The v0.1.1 
 ![](images/63741647000861_.pic.jpg)
 
 
