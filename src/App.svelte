@@ -1,5 +1,6 @@
 <script>
     import {onMount} from 'svelte';
+    import { themeChange } from 'theme-change'
 
     let id = "";
     let title = "";
@@ -46,6 +47,8 @@
     }
 
     onMount(async () => {
+        themeChange(false)
+
         updateViewAtPopup()
     })
 
@@ -53,8 +56,22 @@
 
 <section class="text-gray-600 body-font relative">
     <div class="container px-5 py-5 mx-auto">
-        <div class="flex flex-col text-center w-full">
-            <h1 class="text-3xl font-extrabold text-primary">Save Bookmark</h1>
+        <div class="navbar bg-base-100">
+            <div class="flex-1">
+                <h1 class="text-3xl font-extrabold text-primary">Save Bookmark</h1>
+            </div>
+            <div class="flex-none">
+                <label for="theme-select" class="font-bold input-group">
+                    <span>Choose Theme</span>
+                    <select id="theme-select" data-choose-theme class="select">
+                        <option value="Business">Default</option>
+                        <option value="dark">Dark</option>
+                        <option value="dracula">Dracula</option>
+                        <option value="luxury">luxury</option>
+                        <option value="Coffee">Coffee</option>
+                    </select>
+                </label>
+            </div>
         </div>
         <div class="lg:w-1/2 md:w-2/3 mx-auto">
             <div class="flex flex-wrap -m-2">
@@ -77,7 +94,7 @@
                                   class="textarea h-36 " bind:value={comment} autofocus/>
                     </div>
                 </div>
-                <div class="p-2 w-full">
+                <div class="p-2 w-full inline-flex items-baseline">
                     <button class="btn btn-block" on:click={save}>Save</button>
                 </div>
             </div>

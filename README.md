@@ -19,6 +19,11 @@ chrome bookmark extension from keevol.com
 - [X] enrich metadata to bookmark with indexedDB
   - [X] load existing comment when popup
 - [ ] add override page to allow users to search and access enriched bookmarks
+  - `bookmarks` and `newTab` can be overridden, we choose `bookmarks` as the target.
+
+
+
+
 
 # legacy code snippets
 
