@@ -18,10 +18,11 @@ chrome bookmark extension from keevol.com
     - update instead of add when same title & same url
 - [X] enrich metadata to bookmark with indexedDB
   - [X] load existing comment when popup
+- [X] add theme change
+- [X] enable notification on done successfully
 - [ ] add override page to allow users to search and access enriched bookmarks
   - `bookmarks` and `newTab` can be overridden, we choose `bookmarks` as the target.
-
-
+  - [ ] enable search bookmarks by keywords in comment
 
 
 
