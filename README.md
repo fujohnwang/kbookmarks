@@ -2,6 +2,13 @@
 
 chrome bookmark extension from keevol.com
 
+![](public/icon.jpg)
+
+## how it looks (revision 0.1.1)
+
+![](images/63741647000861_.pic.jpg)
+
+
 # quick start
 
 1. clone this repo to local: `git clone git@github.com:fujohnwang/kbookmark.git`
@@ -26,31 +33,6 @@ chrome bookmark extension from keevol.com
 
 
 
-# legacy code snippets
-
-```js
-chrome.notifications.create('kBookmarkNotification', {
-    title: "Success",
-    message: "bookmark added successfully.",
-    iconUrl: "favicon.png",
-    type: 'basic',
-    priority: 2
-}, function (id) {
-    sendResponse({farewell: "goodbye"});
-})
-
-
-// chrome.bookmarks.onCreated.addListener(function (id, bookmark) {
-//     console.log("bookmark created: %o", bookmark)
-//     chrome.bookmarks.get(bookmark.id, function (results) {
-//         if (itemExists(results)) {
-//
-//         }else{
-//
-//         }
-//     });
-// });
-```
 
 
 
