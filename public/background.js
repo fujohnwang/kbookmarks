@@ -131,6 +131,17 @@ chrome.runtime.onMessage.addListener(
                         }
                         console.log("update bookmark with enhanced comment: %o", wrapBookmark)
                         updateMeta(wrapBookmark)
+
+                        chrome.notifications.create('kBookmarkNotification', {
+                            title: "Success",
+                            message: "bookmark updated successfully.",
+                            iconUrl: "icon.jpg",
+                            type: 'basic',
+                            priority: 2
+                        }, function (id) {
+                            // callback if necessary
+                        })
+
                     } else {
                         chrome.storage.sync.get([kBookmarkFolderIdSyncKey], function (result) {
                             if (chrome.runtime.lastError) {
@@ -150,6 +161,16 @@ chrome.runtime.onMessage.addListener(
                                     }
                                     console.log("add enhanced bookmark to indexed db: %o", enhancedBookmark)
                                     appendMeta(enhancedBookmark)
+
+                                    chrome.notifications.create('kBookmarkNotification', {
+                                        title: "Success",
+                                        message: "bookmark added successfully.",
+                                        iconUrl: "icon.jpg",
+                                        type: 'basic',
+                                        priority: 2
+                                    }, function (id) {
+                                        // callback if necessary
+                                    })
                                 })
                             }
                         });

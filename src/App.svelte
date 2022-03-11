@@ -16,16 +16,6 @@
         }).then((v) => {
             console.log("receives response when saved: %o", v)
             window.close();
-
-            // chrome.notifications.create('kBookmarkNotification', {
-            //     title: "Success",
-            //     message: "bookmark added successfully.",
-            //     iconUrl: "favicon.png",
-            //     type: 'basic',
-            //     priority: 2
-            // }, function (id) {
-            //
-            // })
         });
     }
 
