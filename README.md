@@ -17,7 +17,7 @@ chrome bookmark extension from keevol.com
 - [X] remove redundancy of bookmark items
     - update instead of add when same title & same url
 - [X] enrich metadata to bookmark with indexedDB
-  - [ ] load existing comment when popup
+  - [X] load existing comment when popup
 - [ ] add override page to allow users to search and access enriched bookmarks
 
 # legacy code snippets
