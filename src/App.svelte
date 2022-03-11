@@ -1,30 +1,53 @@
 <script>
+    import {onMount} from 'svelte';
+
+    let id = "";
     let title = "";
+    let url = "";
     let comment = "";
 
     function save() {
         // save bookmark and then
-        chrome.runtime.sendMessage({"title": title, "comment": comment}).then((v) => {
+        chrome.runtime.sendMessage({
+            typ: "save",
+            title: title,
+            comment: comment
+        }).then((v) => {
+            console.log("receives response when saved: %o", v)
             window.close();
 
-            chrome.notifications.create('kBookmarkNotification', {
-                title: "Success",
-                message: "bookmark added successfully.",
-                iconUrl: "favicon.png",
-                type: 'basic',
-                priority: 2
-            }, function(id){
+            // chrome.notifications.create('kBookmarkNotification', {
+            //     title: "Success",
+            //     message: "bookmark added successfully.",
+            //     iconUrl: "favicon.png",
+            //     type: 'basic',
+            //     priority: 2
+            // }, function (id) {
+            //
+            // })
+        });
+    }
 
+
+    function updateViewAtPopup() {
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+            let tab = tabs[0];
+            title = tab.title;
+            url = tab.url;
+            chrome.runtime.sendMessage({
+                typ: "load",
+                title: title,
+                url: url
+            }).then(response => {
+                console.log("receives load response: %o", response)
+                comment = response.comment;
             })
         });
     }
 
-    function setTitle(e) {
-        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-            let tab = tabs[0];
-            title = tab.title;
-        });
-    }
+    onMount(async () => {
+        updateViewAtPopup()
+    })
 
 </script>
 
@@ -40,8 +63,7 @@
                         <label class="label" for="title">
                             <span class="label-text">Title</span>
                         </label>
-                        <input id="title" type="text" placeholder="Type here" class="input w-full" bind:value={title}
-                               use:setTitle>
+                        <input id="title" type="text" placeholder="Type here" class="input w-full" bind:value={title}/>
                     </div>
                 </div>
                 <div class="p-2 w-full">

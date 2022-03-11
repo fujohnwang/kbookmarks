@@ -58,23 +58,7 @@ chrome.runtime.onInstalled.addListener(e => {
 })
 
 function appendMeta(bookmark) {
-    const request = indexedDB.open(kBookmarkIndexedDBName, 1);
-    request.onerror = (event) => {
-        console.error(`Database error at open: ${event.target.errorCode}`);
-    };
-    request.onsuccess = (event) => {
-        const db = event.target.result;
-        console.log(`add bookmark into db: ${kBookmarkIndexedDBName} with store: ${kBookmarkIdbStoreName}...`)
-        // let request = db.transaction([kBookmarkIndexedDBName], 'readwrite').objectStore([kBookmarkIdbStoreName]).add(bookmark);
-        // request.onsuccess = function (event) {
-        //     console.log('数据写入成功');
-        // };
-        // request.onerror = function (event) {
-        //     console.log('数据写入失败');
-        // }
-
-        const txn = db.transaction(kBookmarkIdbStoreName, 'readwrite');
-        const store = txn.objectStore(kBookmarkIdbStoreName);
+    doWith(function (store) {
         let query = store.add(bookmark);
         query.onsuccess = function (event) {
             console.log(event);
@@ -82,34 +66,37 @@ function appendMeta(bookmark) {
         query.onerror = function (event) {
             console.log(event.target.errorCode);
         }
+    })
+}
+
+function updateMeta(bookmark) {
+    doWith(function (store) {
+        let query = store.put(bookmark);
+        query.onsuccess = function (event) {
+            console.log(event);
+        };
+        query.onerror = function (event) {
+            console.log(event.target.errorCode);
+        }
+    })
+}
+
+function doWith(callback) {
+    const request = indexedDB.open(kBookmarkIndexedDBName, 1);
+    request.onerror = (event) => {
+        console.error(`Database error at open: ${event.target.errorCode}`);
+    };
+    request.onsuccess = (event) => {
+        const db = event.target.result;
+        const txn = db.transaction(kBookmarkIdbStoreName, 'readwrite');
+        const store = txn.objectStore(kBookmarkIdbStoreName);
+        callback(store)
         txn.oncomplete = function () {
             db.close();
         };
     };
 }
 
-// function getContactById(db, id) {
-//     const txn = db.transaction('Contacts', 'readonly');
-//     const store = txn.objectStore('Contacts');
-//
-//     let query = store.get(id);
-//
-//     query.onsuccess = (event) => {
-//         if (!event.target.result) {
-//             console.log(`The contact with ${id} not found`);
-//         } else {
-//             console.table(event.target.result);
-//         }
-//     };
-//
-//     query.onerror = (event) => {
-//         console.log(event.target.errorCode);
-//     }
-//
-//     txn.oncomplete = function () {
-//         db.close();
-//     };
-// };
 
 function bookmarkExists(t, i, f) {
     chrome.bookmarks.search({
@@ -120,50 +107,90 @@ function bookmarkExists(t, i, f) {
 
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
-        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-            let tab = tabs[0];
-            let title = request.title;
-            let comment = request.comment;
-            console.log(`receives message: ${title}, ${tab.url}, message=${comment}`)
+        let title = request.title;
+        let comment = request.comment;
 
-            bookmarkExists(title, tab.url, (items) => {
-                if (itemExists(items)) {
-                    console.log("TODO: we should update the bookmark")
-                    let existingBookmark = items[0]
-                    chrome.bookmarks.update(existingBookmark.id, {
-                        title: title, url: tab.url
-                    }, function (result) {
-                        console.log(`update bookmark: ${existingBookmark.id} with title=${title} and url = ${tab.url}`)
-                    });
+        if(request.typ === "save") {
+            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                let tab = tabs[0];
+                console.log(`receives message: ${title}, ${tab.url}, message=${comment}`)
 
-                    // TODO update meta if necessary
+                bookmarkExists(title, tab.url, (items) => {
+                    if (itemExists(items)) {
+                        let existingBookmark = items[0]
+                        console.log("update the bookmark: %o", existingBookmark)
+                        chrome.bookmarks.update(existingBookmark.id, {
+                            title: title, url: tab.url
+                        }, function (result) {
+                            console.log(`update bookmark: ${existingBookmark.id} with title=${title} and url = ${tab.url}`)
+                        });
 
-                } else {
-                    chrome.storage.sync.get([kBookmarkFolderIdSyncKey], function (result) {
-                        if (chrome.runtime.lastError) {
-                            console.log(`ERROR: fails to get folder id from storage.sync with result=${result}`)
-                        } else {
-                            const parentFolderId = result[kBookmarkFolderIdSyncKey];
-                            console.log("1. create raw bookmark of chrome into folder with id=" + parentFolderId)
-                            chrome.bookmarks.create({
-                                'parentId': parentFolderId,
-                                'title': title,
-                                'url': tab.url
-                            }, function (result) {
-                                // 2. add comment and bookmark to indexedDB
-                                const enhancedBookmark = {
-                                    ...result,
-                                    comment: comment
-                                }
-                                console.log("add enhanced bookmark to indexed db: %o", enhancedBookmark)
-                                appendMeta(enhancedBookmark)
-                            })
+                        let wrapBookmark = {
+                            ...existingBookmark,
+                            comment: comment
                         }
-                    });
-                }
-                sendResponse({message: "done!"});
+                        console.log("update bookmark with enhanced comment: %o", wrapBookmark)
+                        updateMeta(wrapBookmark)
+                    } else {
+                        chrome.storage.sync.get([kBookmarkFolderIdSyncKey], function (result) {
+                            if (chrome.runtime.lastError) {
+                                console.log(`ERROR: fails to get folder id from storage.sync with result=${result}`)
+                            } else {
+                                const parentFolderId = result[kBookmarkFolderIdSyncKey];
+                                console.log("1. create raw bookmark of chrome into folder with id=" + parentFolderId)
+                                chrome.bookmarks.create({
+                                    'parentId': parentFolderId,
+                                    'title': title,
+                                    'url': tab.url
+                                }, function (result) {
+                                    // 2. add comment and bookmark to indexedDB
+                                    const enhancedBookmark = {
+                                        ...result,
+                                        comment: comment
+                                    }
+                                    console.log("add enhanced bookmark to indexed db: %o", enhancedBookmark)
+                                    appendMeta(enhancedBookmark)
+                                })
+                            }
+                        });
+                    }
+                    sendResponse({message: "done!"});
+                });
             });
-        });
+            return true;
+        }
+        if(request.typ === "load") {
+            bookmarkExists(title, comment, function (items) {
+                if(itemExists(items)) {
+                    let existingBookmark = items[0]
+                    doWith(function (store) {
+                        let query = store.get(existingBookmark.id)
+                        query.onerror = (event) => {
+                            console.log(event.target.errorCode);
+                        }
+                        query.onsuccess = (event) => {
+                            if (!event.target.result) {
+                                console.log(`The contact with ${id} not found`);
+                                sendResponse({
+                                    comment: ""
+                                })
+                            } else {
+                                console.log("send back load result: %o", event.target.result)
+
+                                sendResponse({
+                                    ...event.target.result
+                                })
+                            }
+                        };
+                    })
+                }else{
+                    sendResponse({
+                        comment: ""
+                    })
+                }
+            })
+            return true;
+        }
         return true;  // indicate for async process in background to continue
     }
 );
