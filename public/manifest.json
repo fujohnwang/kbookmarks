@@ -6,6 +6,7 @@
   "description": "bookmark from keevol",
   "permissions": [
     "storage",
+    "unlimitedStorage",
     "activeTab",
     "tabs",
     "scripting",

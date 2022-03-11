@@ -16,10 +16,10 @@ chrome bookmark extension from keevol.com
 
 - [X] remove redundancy of bookmark items
     - update instead of add when same title & same url
-- [ ] enrich metadata to bookmark with indexedDB
+- [X] enrich metadata to bookmark with indexedDB
 - [ ] add override page to allow users to search and access enriched bookmarks
 
-# code snippets
+# legacy code snippets
 
 ```js
 chrome.notifications.create('kBookmarkNotification', {
@@ -47,7 +47,12 @@ chrome.notifications.create('kBookmarkNotification', {
 
 
 
+# Ref
 
-
-
-
+- https://www.javascripttutorial.net/web-apis/javascript-indexeddb/
+- https://developers.google.com/web/ilt/pwa/working-with-indexeddb
+- https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+- https://dev.to/alexeagleson/how-to-use-indexeddb-to-store-data-for-your-web-application-in-the-browser-1o90
+- https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+- https://w3c.github.io/IndexedDB/
+- https://dev.to/anobjectisa/local-database-and-chrome-extensions-indexeddb-36n
