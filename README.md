@@ -33,10 +33,9 @@ The v0.1.1
 - [X] add theme change
 - [X] enable notification on done successfully
 - [ ] add override page to allow users to search and access enriched bookmarks
-  - `bookmarks` and `newTab` can be overridden, we choose `bookmarks` as the target.
-  - [ ] enable search bookmarks by keywords in comment
-
-
+  - `bookmarks` and `newTab` can be overridden, we choose `bookmarks` as the target. ❎
+  - [X] enable search bookmarks by keywords in comment
+  - [ ] iterate on cursor of indexedDB may have potential bug, dive into it later on
 
 
 

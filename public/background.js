@@ -11,8 +11,14 @@ chrome.runtime.onInstalled.addListener(e => {
     chrome.bookmarks.search({title: kBookmarkFolderName}, function (results) {
         if (itemExists(results)) {
             console.log(`bookmark folder: ${kBookmarkFolderName} exists, ignore to avoid recreating it.`)
-            // TODO but we need to query for the folder id to get it used later
-
+            let id = results[0].id;
+            chrome.storage.sync.set({[kBookmarkFolderIdSyncKey]: id}, function () {
+                if (chrome.runtime.lastError) {
+                    console.log(`ERROR: chrome.runtime.error, fails to sync bookmark folder id to storage.`)
+                } else {
+                    console.log(`set ${id} as value of ${kBookmarkFolderIdSyncKey} to chrome.storage.sync`);
+                }
+            });
         } else {
             console.log(`create bookmark folder: ${kBookmarkFolderName} at extension installation.`)
             chrome.bookmarks.create(
@@ -110,7 +116,7 @@ chrome.runtime.onMessage.addListener(
         let title = request.title;
         let comment = request.comment;
 
-        if(request.typ === "save") {
+        if (request.typ === "save") {
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
                 let tab = tabs[0];
                 console.log(`receives message: ${title}, ${tab.url}, message=${comment}`)
@@ -180,9 +186,9 @@ chrome.runtime.onMessage.addListener(
             });
             return true;
         }
-        if(request.typ === "load") {
+        if (request.typ === "load") {
             bookmarkExists(title, comment, function (items) {
-                if(itemExists(items)) {
+                if (itemExists(items)) {
                     let existingBookmark = items[0]
                     doWith(function (store) {
                         let query = store.get(existingBookmark.id)
@@ -191,7 +197,7 @@ chrome.runtime.onMessage.addListener(
                         }
                         query.onsuccess = (event) => {
                             if (!event.target.result) {
-                                console.log(`The contact with ${id} not found`);
+                                console.log(`The contact with ${existingBookmark.id} not found`);
                                 sendResponse({
                                     comment: ""
                                 })
@@ -204,11 +210,72 @@ chrome.runtime.onMessage.addListener(
                             }
                         };
                     })
-                }else{
+                } else {
                     sendResponse({
                         comment: ""
                     })
                 }
+            })
+            return true;
+        }
+
+        if (request.typ === "so") {
+            let keyword = request.keyword;
+            console.log("start searching with keyword: " + keyword)
+            doWith(function (store) {
+                let titleSearchPromise = new Promise((resolve, reject) => {
+                    let bookmarks = [];
+                    store.index("titleIdx").openCursor(null, 'prev').onsuccess = function (e) {
+                        let cursor = e.target.result;
+
+                        if (cursor) {
+                            if (cursor.value.title.includes(keyword)) {
+                                console.log(`found keyword: ${keyword} in title index, add it to result list...`)
+                                bookmarks.push( {
+                                    id: cursor.value.id,
+                                    title: cursor.value.title,
+                                    url: cursor.value.url,
+                                    comment: cursor.value.comment,
+                                    ts: cursor.value.dateAdded
+                                })
+                            } else {
+                                cursor.continue();
+                            }
+                        }
+                        resolve(bookmarks)
+                    }
+                })
+                let commentSearchPromise = new Promise((resolve, reject) => {
+                    let bookmarks = [];
+                    store.index("commentIdx").openCursor(null, 'prev').onsuccess = function (e) {
+                        let cursor = e.target.result;
+                        if (cursor) {
+                            if (cursor.value.comment.includes(keyword)) {
+                                console.log(`found keyword: ${keyword} in comment index, add it to result list...`)
+                                bookmarks.push({
+                                    id: cursor.value.id,
+                                    title: cursor.value.title,
+                                    url: cursor.value.url,
+                                    comment: cursor.value.comment,
+                                    ts: cursor.value.dateAdded
+                                })
+                            } else {
+                                cursor.continue();
+                            }
+                        }
+                        resolve(bookmarks)
+                    }
+                })
+
+                Promise.all([titleSearchPromise, commentSearchPromise]).then(values => {
+                    let bookmarks = values.flat();
+
+                    console.log("search results: %o", bookmarks)
+                    console.log("after toJson: " + JSON.stringify(bookmarks))
+                    sendResponse({
+                        bookmarks: bookmarks
+                    })
+                })
             })
             return true;
         }

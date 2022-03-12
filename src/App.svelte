@@ -1,11 +1,17 @@
 <script>
     import {onMount} from 'svelte';
-    import { themeChange } from 'theme-change'
+    import {themeChange} from 'theme-change'
+    import {key} from "localforage";
+    import _ from 'lodash';
+
+    import ResultList from "./ResultList.svelte";
 
     let id = "";
     let title = "";
     let url = "";
     let comment = "";
+
+    let searchResult = [];
 
     function save() {
         // save bookmark and then
@@ -36,6 +42,33 @@
         });
     }
 
+    function search(keyword) {
+        console.log(`searching with keyword: ${keyword}`)
+        chrome.runtime.sendMessage({
+            typ: "so",
+            keyword: keyword
+        }).then((v) => {
+            console.log("receives response at search: %o", v)
+
+            let bookmarks = v.bookmarks;
+            console.log("bookmarks value: " + bookmarks)
+            if (bookmarks && Array.isArray(bookmarks) && bookmarks.length) {
+                // TODO swap <svelte:component>
+                searchResult = [...bookmarks];
+            }
+        });
+    }
+
+    const handleInput = _.debounce(e => {
+        search(e.target.value);
+    }, 300)
+
+    const onEnter = e => {
+        if (e.charCode === 13) {
+            search(e.target.value);
+        }
+    }
+
     onMount(async () => {
         themeChange(false)
 
@@ -48,11 +81,16 @@
     <div class="container px-5 py-5 mx-auto">
         <div class="navbar bg-base-100">
             <div class="flex-1">
-                <h1 class="text-3xl font-extrabold text-primary">Save Bookmark</h1>
+                <h1 class="text-3xl font-extrabold text-primary">kBookmarks</h1>
+            </div>
+            <div class="form-control">
+                <input type="text" placeholder="Search" class="input input-bordered"
+                       on:input={handleInput}
+                       on:keypress={onEnter}>
             </div>
             <div class="flex-none">
                 <label for="theme-select" class="font-bold input-group">
-                    <span>Choose Theme</span>
+                    <!--                    <span>Choose Theme</span>-->
                     <select id="theme-select" data-choose-theme class="select">
                         <option value="Business">Default</option>
                         <option value="dark">Dark</option>
@@ -89,6 +127,8 @@
                 </div>
             </div>
         </div>
+
+        <ResultList bind:bookmarks={searchResult}/>
     </div>
 </section>
 
