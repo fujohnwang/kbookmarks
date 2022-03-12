@@ -1,17 +1,30 @@
-# Intro
-
-chrome bookmark extension from keevol.com
-
 ![](public/icon.jpg)
 
-## how it looks 
+# Intro to kBookmarks
+
+kBookmarks is a Chrome bookmark extension from [KEEVOL](https://keevol.com)
+
+The critical philosophy of this extension is "**For long-tail less-used bookmarks, we can tag them and comment them at save and recall them later on by search with tags or comment we have left before**".
+
+For bookmarks we use in daily, Folder-based management is OK, so kBookmarks still keep the original bookmark manager functionalities untouched.
+
+
+
+## how it looks (so that you are interested in the evolution path)
 
 The original (v0.0.1)
+
 ![](images/63541646913106_.pic.jpg)
 
 
-The v0.1.1 
+The v0.1.1 (add theme change)
+
 ![](images/63741647000861_.pic.jpg)
+
+The v0.2.0 (add searching)
+
+![](images/63811647096225_.pic.jpg)
+
 
 
 # quick start
@@ -32,12 +45,12 @@ The v0.1.1
   - [X] load existing comment when popup
 - [X] add theme change
 - [X] enable notification on done successfully
-- [ ] add override page to allow users to search and access enriched bookmarks
+- [X] add override page to allow users to search and access enriched bookmarks
   - `bookmarks` and `newTab` can be overridden, we choose `bookmarks` as the target. ❎
   - [X] enable search bookmarks by keywords in comment
   - [ ] iterate on cursor of indexedDB may have potential bug, dive into it later on
 
-
+- [ ] we may introduce router-based layout instead of the current list-based in one view.
 
 
 # Ref
