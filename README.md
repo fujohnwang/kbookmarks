@@ -4,7 +4,7 @@
 
 kBookmarks is a Chrome bookmark extension from [KEEVOL](https://keevol.com)
 
-The critical philosophy of this extension is "**For long-tail less-used bookmarks, we can tag them and comment them at save and recall them later on by search with tags or comment we have left before**".
+The critical philosophy of this extension is "**For long-tail less-used bookmarks, we can tag them and comment them at save and recall them later on by searching with tags or comment we have left before**".
 
 For bookmarks we use in daily, Folder-based management is OK, so kBookmarks still keep the original bookmark manager functionalities untouched.
 
