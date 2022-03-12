@@ -1,7 +1,6 @@
 <script>
     import {onMount} from 'svelte';
     import {themeChange} from 'theme-change'
-    import {key} from "localforage";
     import _ from 'lodash';
 
     import ResultList from "./ResultList.svelte";
@@ -43,23 +42,27 @@
     }
 
     function search(keyword) {
-        console.log(`searching with keyword: ${keyword}`)
-        chrome.runtime.sendMessage({
-            typ: "so",
-            keyword: keyword
-        }).then((v) => {
-            console.log("receives response at search: %o", v)
+        if (keyword && keyword.length) {
+            console.log(`searching with keyword: ${keyword}`)
+            chrome.runtime.sendMessage({
+                typ: "so",
+                keyword: keyword
+            }).then((v) => {
+                console.log("receives response at search: %o", v)
 
-            let bookmarks = v.bookmarks;
-            console.log("bookmarks value: " + bookmarks)
-            if (bookmarks && Array.isArray(bookmarks) && bookmarks.length) {
-                // TODO swap <svelte:component>
-                searchResult = [...bookmarks];
-            }
-        });
+                let bookmarks = v.bookmarks;
+                console.log("bookmarks value: " + bookmarks)
+                if (bookmarks && Array.isArray(bookmarks) && bookmarks.length) {
+                    searchResult = [...bookmarks];
+                }
+            });
+        } else {
+            searchResult = []
+        }
     }
 
     const handleInput = _.debounce(e => {
+
         search(e.target.value);
     }, 300)
 
