@@ -48,9 +48,11 @@ The v0.2.0 (add searching)
 - [X] add override page to allow users to search and access enriched bookmarks
   - `bookmarks` and `newTab` can be overridden, we choose `bookmarks` as the target. ❎
   - [X] enable search bookmarks by keywords in comment
-  - [ ] iterate on cursor of indexedDB may have potential bug, dive into it later on
-
+  - [X] iterate on cursor of indexedDB may have potential bug, dive into it later on 
+    - checked,  no such potential bug ✅
+- [ ] add flip link to options/settings view on click the kBookmarks header instead of option page standalone
 - [ ] we may introduce router-based layout instead of the current list-based in one view.
+- [ ] package and submit to play store
 
 
 # Ref
