@@ -65,8 +65,8 @@ run `npm run build` and then everything is ready in `public` folder.
       - refer to : <https://stackoverflow.com/questions/68331241/how-does-the-cursor-inside-if-statment-can-loop-using-idbcursor-continue-in-ja>
 - [ ] add flip link to options/settings view on click the kBookmarks header instead of option page standalone
 - [ ] we may introduce router-based layout instead of the current list-based in one view.
-- [ ] package and submit to play store
-
+- [X] [package](https://developer.chrome.com/docs/extensions/mv3/linux_hosting/#packaging) and [submit to play store](https://developer.chrome.com/docs/webstore/publish/)
+  - > Extensions and themes are served as .crx files. When uploading through the Chrome Developer Dashboard, the dashboard creates the crx file automatically. If published on a personal server, the crx file will need to be created locally or downloaded from the Chrome Web Store.
 
 
 
