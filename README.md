@@ -50,6 +50,7 @@ The v0.2.0 (add searching)
   - [X] enable search bookmarks by keywords in comment
   - [X] iterate on cursor of indexedDB may have potential bug, dive into it later on 
     - checked,  no such potential bug ✅
+      - refer to : <https://stackoverflow.com/questions/68331241/how-does-the-cursor-inside-if-statment-can-loop-using-idbcursor-continue-in-ja>
 - [ ] add flip link to options/settings view on click the kBookmarks header instead of option page standalone
 - [ ] we may introduce router-based layout instead of the current list-based in one view.
 - [ ] package and submit to play store
