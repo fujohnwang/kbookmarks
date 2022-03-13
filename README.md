@@ -43,6 +43,12 @@ The v0.2.0 (add searching)
 4. You can enjoy this extension now.
 
 
+
+# How to build by yourself?
+
+run `npm run build` and then everything is ready in `public` folder.
+
+
 # TODO
 
 - [X] remove redundancy of bookmark items
@@ -60,6 +66,8 @@ The v0.2.0 (add searching)
 - [ ] add flip link to options/settings view on click the kBookmarks header instead of option page standalone
 - [ ] we may introduce router-based layout instead of the current list-based in one view.
 - [ ] package and submit to play store
+
+
 
 
 # Ref
