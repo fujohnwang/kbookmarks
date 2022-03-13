@@ -42,7 +42,9 @@ The v0.2.0 (add searching)
 ![](images/63631646919286_.pic.jpg)
 4. You can enjoy this extension now.
 
+# How to install
 
+<https://github.com/fujohnwang/kbookmark/wiki#how-to-install>
 
 # How to build by yourself?
 
