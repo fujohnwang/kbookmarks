@@ -8,6 +8,11 @@ The critical philosophy of this extension is "**For long-tail less-used bookmark
 
 For bookmarks we use in daily, Folder-based management is OK, so kBookmarks still keep the original bookmark manager functionalities untouched.
 
+书签的管理可以采用**`固定目录+长尾标注`**的组合方式，
+经常用的，放到固定目录以及Bookmarks Bar上，
+不常用的，就不分结构扁平化一股脑放到一个位置， 但追加标注或者标签。
+需要的时候，根据标注或者标签印象搜索就可以直达了，
+这就是要打造kBookmarks这个chrome extension的初衷。
 
 
 ## how it looks (so that you are interested in the evolution path)
