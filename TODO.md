@@ -17,6 +17,6 @@
   ![](images/64061647225093_.pic.jpg)
 - [X] [package](https://developer.chrome.com/docs/extensions/mv3/linux_hosting/#packaging) and [submit to play store](https://developer.chrome.com/docs/webstore/publish/)
     - > Extensions and themes are served as .crx files. When uploading through the Chrome Developer Dashboard, the dashboard creates the crx file automatically. If published on a personal server, the crx file will need to be created locally or downloaded from the Chrome Web Store.
-- [ ] replace raw IndexedDB with [jsStore](https://jsstore.net/)
+- [X] replace raw IndexedDB with [jsStore](https://jsstore.net/)
     - since currently the search and open/close issues are still buggy with raw IndexedDB
-
+    - No need anymore, we have fix bug on search with IndexedDB.

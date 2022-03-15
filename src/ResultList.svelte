@@ -1,8 +1,7 @@
 <script>
 
     import {onMount} from "svelte";
-
-    export let so = "";
+    import {searchKeyword} from './repo.js';
 
     let bookmarks = [];
 
@@ -32,7 +31,8 @@
     }
 
     onMount(async () => {
-        search(so);
+        console.log("start search with keyword=" + $searchKeyword)
+        search($searchKeyword);
     })
 
 </script>

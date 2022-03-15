@@ -1,33 +1,27 @@
 <script>
     import {onMount} from 'svelte';
     import {themeChange} from 'theme-change'
+    // import {idb, dbName, tableName} from './idb';
     import _ from 'lodash';
     import Router from 'svelte-spa-router';
     import {link} from 'svelte-spa-router';
-    import {wrap} from 'svelte-spa-router/wrap';
     import {push, pop, replace} from 'svelte-spa-router';
-
     import Default from './SaveBookmark.svelte';
     import Settings from './Settings.svelte';
     import ResultList from "./ResultList.svelte";
 
-    let searchKeyword = "";
+    import {searchKeyword} from './repo.js';
 
     const routes = {
         '/': Default,
         '/settings': Settings,
-        '/results': wrap({
-            component: ResultList,
-            props: {
-                so: searchKeyword
-            }
-        }),
+        '/results': ResultList,
         '*': Default
     }
 
     function search(keyword) {
         if (keyword) {
-            searchKeyword = keyword;
+            $searchKeyword = keyword;
             push('/results')
         } else {
             push('/')
@@ -50,6 +44,17 @@
 
     onMount(async () => {
         themeChange(false)
+
+        // idb init
+        // await idb.initDb({
+        //     name: dbName,
+        //     tables: [{
+        //         name: tableName,
+        //         columns: {}
+        //     }]
+        // });
+
+
     })
 
 </script>

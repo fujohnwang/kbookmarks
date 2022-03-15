@@ -1,37 +1,7 @@
-// import {JsStore} from './jsstore.min';
-
 const kBookmarkFolderName = "kBookmarks"
 const kBookmarkFolderIdSyncKey = "com.keevol.kbookmarks.folder.id"
 const kBookmarkIndexedDBName = "kbookmarksIdb"
 const kBookmarkIdbStoreName = "kbookmarksMetaStore"
-
-// let connection = new JsStore.Connection(new Worker('jsstore.worker.js'));
-//
-// let dbName ='JsStore_Demo';
-// let tblProduct = {
-//     name: 'Product',
-//     columns: {
-//         // Here "Id" is name of column
-//         id:{ primaryKey: true, autoIncrement: true },
-//         itemName:  { notNull: true, dataType: "string" },
-//         price:  { notNull: true, dataType: "number" },
-//         quantity : { notNull: true, dataType: "number" }
-//     }
-// };
-// let database = {
-//     name: dbName,
-//     tables: [tblProduct]
-// }
-//
-// const isDbCreated = await connection.initDb(database);
-// if(isDbCreated === true){
-//     console.log("db created");
-//     // here you can prefill database with some data
-// }
-// else {
-//     console.log("db opened");
-// }
-
 
 function itemExists(results) {
     return results && Array.isArray(results) && results.length;
@@ -257,22 +227,21 @@ chrome.runtime.onMessage.addListener(
                     let bookmarks = [];
                     store.index("titleIdx").openCursor().onsuccess = function (e) {
                         let cursor = e.target.result;
-
                         if (cursor) {
                             if (cursor.value.title.includes(keyword)) {
                                 console.log(`found keyword: ${keyword} in title index, add it to result list...`)
-                                bookmarks.push( {
+                                bookmarks.push({
                                     id: cursor.value.id,
                                     title: cursor.value.title,
                                     url: cursor.value.url,
                                     comment: cursor.value.comment,
                                     ts: cursor.value.dateAdded
                                 })
-                            } else {
-                                cursor.continue();
                             }
+                            cursor.continue();
+                        } else {
+                            resolve(bookmarks)
                         }
-                        resolve(bookmarks)
                     }
                 })
                 let commentSearchPromise = new Promise((resolve, reject) => {
@@ -289,11 +258,11 @@ chrome.runtime.onMessage.addListener(
                                     comment: cursor.value.comment,
                                     ts: cursor.value.dateAdded
                                 })
-                            } else {
-                                cursor.continue();
                             }
+                            cursor.continue();
+                        } else {
+                            resolve(bookmarks)
                         }
-                        resolve(bookmarks)
                     }
                 })
 
