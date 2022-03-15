@@ -3,7 +3,7 @@
   "manifest_version": 3,
   "version": "0.1",
   "author": "fujohnwang",
-  "description": "bookmark from keevol",
+  "description": "bookmark manager chrome extension from keevol",
   "permissions": [
     "storage",
     "unlimitedStorage",
@@ -14,7 +14,8 @@
     "notifications"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_icon": "icon.jpg",

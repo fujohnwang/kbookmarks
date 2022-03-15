@@ -1,7 +1,37 @@
+// import {JsStore} from './jsstore.min';
+
 const kBookmarkFolderName = "kBookmarks"
 const kBookmarkFolderIdSyncKey = "com.keevol.kbookmarks.folder.id"
 const kBookmarkIndexedDBName = "kbookmarksIdb"
 const kBookmarkIdbStoreName = "kbookmarksMetaStore"
+
+// let connection = new JsStore.Connection(new Worker('jsstore.worker.js'));
+//
+// let dbName ='JsStore_Demo';
+// let tblProduct = {
+//     name: 'Product',
+//     columns: {
+//         // Here "Id" is name of column
+//         id:{ primaryKey: true, autoIncrement: true },
+//         itemName:  { notNull: true, dataType: "string" },
+//         price:  { notNull: true, dataType: "number" },
+//         quantity : { notNull: true, dataType: "number" }
+//     }
+// };
+// let database = {
+//     name: dbName,
+//     tables: [tblProduct]
+// }
+//
+// const isDbCreated = await connection.initDb(database);
+// if(isDbCreated === true){
+//     console.log("db created");
+//     // here you can prefill database with some data
+// }
+// else {
+//     console.log("db opened");
+// }
+
 
 function itemExists(results) {
     return results && Array.isArray(results) && results.length;
@@ -225,7 +255,7 @@ chrome.runtime.onMessage.addListener(
             doWith(function (store) {
                 let titleSearchPromise = new Promise((resolve, reject) => {
                     let bookmarks = [];
-                    store.index("titleIdx").openCursor(null, 'prev').onsuccess = function (e) {
+                    store.index("titleIdx").openCursor().onsuccess = function (e) {
                         let cursor = e.target.result;
 
                         if (cursor) {
@@ -247,7 +277,7 @@ chrome.runtime.onMessage.addListener(
                 })
                 let commentSearchPromise = new Promise((resolve, reject) => {
                     let bookmarks = [];
-                    store.index("commentIdx").openCursor(null, 'prev').onsuccess = function (e) {
+                    store.index("commentIdx").openCursor().onsuccess = function (e) {
                         let cursor = e.target.result;
                         if (cursor) {
                             if (cursor.value.comment.includes(keyword)) {

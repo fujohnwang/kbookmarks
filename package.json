@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "daisyui": "^2.6.3",
+    "jsstore": "^4.3.8",
     "lodash": "^4.17.21",
     "sirv-cli": "^2.0.0",
     "svelte-preprocess": "^4.10.4",
