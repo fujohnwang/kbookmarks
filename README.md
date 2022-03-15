@@ -16,22 +16,11 @@ For bookmarks we use in daily, Folder-based management is OK, so kBookmarks stil
 需要的时候，根据自身对标注或者标签的印象去搜索就可以直达了，这就是要打造kBookmarks这个chrome extension的初衷。
 
 
-## how it looks (so that you are interested in the evolution path)
+## how it looks
 
-The original (v0.0.1)
+![](images/v1.1.0.png)
 
-![](images/63541646913106_.pic.jpg)
-
-
-The v0.1.1 (add theme change)
-
-![](images/63741647000861_.pic.jpg)
-
-The v0.2.0 (add searching)
-
-![](images/63811647096225_.pic.jpg)
-
-
+if you are interested in [the evolution path](docs/evolution_path.md)
 
 # quick start
 
@@ -70,7 +59,7 @@ run `npm run build` and then everything is ready in `public` folder.
      ![](images/64061647225093_.pic.jpg)
 - [X] [package](https://developer.chrome.com/docs/extensions/mv3/linux_hosting/#packaging) and [submit to play store](https://developer.chrome.com/docs/webstore/publish/)
   - > Extensions and themes are served as .crx files. When uploading through the Chrome Developer Dashboard, the dashboard creates the crx file automatically. If published on a personal server, the crx file will need to be created locally or downloaded from the Chrome Web Store.
-- [ ] replace raw IndexedDB with jsStore 
+- [ ] replace raw IndexedDB with [jsStore](https://jsstore.net/)
   - since currently the search and open/close issues are still buggy with raw IndexedDB
 
 
