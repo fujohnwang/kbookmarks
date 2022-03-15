@@ -37,10 +37,10 @@
 
 </script>
 
-<div class="overflow-x-auto">
+<div class="space-y-1 m-1">
     {#if bookmarks && bookmarks.length}
         {#each bookmarks as bk}
-            <div class="card w-96 bg-base-100 shadow-xl">
+            <div class="card w-full bg-base-100 m-1">
                 <div class="card-body cursor-pointer" on:click={openInTab(bk.url)}>
                     <h2 class="card-title">{bk.title}</h2>
                     <p>{bk.comment}</p>

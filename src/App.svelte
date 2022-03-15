@@ -1,7 +1,6 @@
 <script>
     import {onMount} from 'svelte';
     import {themeChange} from 'theme-change'
-    // import {idb, dbName, tableName} from './idb';
     import _ from 'lodash';
     import Router from 'svelte-spa-router';
     import {link} from 'svelte-spa-router';
@@ -44,17 +43,6 @@
 
     onMount(async () => {
         themeChange(false)
-
-        // idb init
-        // await idb.initDb({
-        //     name: dbName,
-        //     tables: [{
-        //         name: tableName,
-        //         columns: {}
-        //     }]
-        // });
-
-
     })
 
 </script>
@@ -65,8 +53,8 @@
             <div class="flex-1">
                 <h1 class="text-3xl font-extrabold text-primary"><a href="/" use:link>kBookmarks</a></h1>
             </div>
-            <div class="form-control w-full flex-auto ml-4 -mr-3">
-                <input type="text" placeholder="Search" class="input input-bordered"
+            <div class="form-control w-full flex-auto ml-4 -mr-2">
+                <input type="text" placeholder="Search..." class="input input-bordered"
                        on:input={handleInput}
                        on:keypress={onEnter}>
             </div>
@@ -118,21 +106,21 @@
             </div>
             <div class="item">
                 <div class="tooltip tooltip-right" data-tip="change theme">
-                    <label for="theme-select" class="font-bold input-group">
-                        <!--                                        <span class="bg-transparent font-bold">Themes</span>-->
-                        <select id="theme-select" data-choose-theme class="select">
-                            <option value="Business">Default</option>
-                            <option value="dark">Dark</option>
+                    <label for="theme-select">
+<!--                        <span class="bg-transparent text-secondary">Change Theme</span>-->
+                        <select id="theme-select" data-choose-theme class="select text-accent">
+                            <option value="Business">DEFAULT</option>
+                            <option value="dark">DARK</option>
                             <option value="dracula">Dracula</option>
-                            <option value="luxury">luxury</option>
-                            <option value="Coffee">Coffee</option>
+                            <option value="luxury">LUXURY</option>
+                            <option value="Coffee">COFFEE</option>
                         </select>
                     </label>
                 </div>
             </div>
             <div class="item">
                 <div class="flex justify-between items-center space-x-0.5">
-                    <button class="btn gap-2 bg-transparent" on:click={goSettings}>
+                    <button class="btn btn-ghost gap-2 bg-transparent text-accent" on:click={goSettings}>
                         Settings
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor" stroke-width="2">
