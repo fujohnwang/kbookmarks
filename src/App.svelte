@@ -60,7 +60,7 @@
             <div class="flex-1">
                 <h1 class="text-3xl font-extrabold text-primary"><a href="/" use:link>kBookmarks</a></h1>
             </div>
-            <div class="form-control w-full flex-auto ml-4 -mr-2">
+            <div class="form-control w-full flex-auto ml-4 -mr-3">
                 <input type="text" placeholder="Search" class="input input-bordered"
                        on:input={handleInput}
                        on:keypress={onEnter}>

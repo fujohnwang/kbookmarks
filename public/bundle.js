@@ -19566,7 +19566,7 @@ var app = (function () {
     			attr_dev(input, "placeholder", "Search");
     			attr_dev(input, "class", "input input-bordered");
     			add_location(input, file, 63, 16, 1630);
-    			attr_dev(div1, "class", "form-control w-full flex-auto ml-4 -mr-2");
+    			attr_dev(div1, "class", "form-control w-full flex-auto ml-4 -mr-3");
     			add_location(div1, file, 62, 12, 1559);
     			attr_dev(div2, "class", "navbar bg-base-100 w-full");
     			add_location(div2, file, 58, 8, 1349);
