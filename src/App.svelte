@@ -8,6 +8,7 @@
     import Default from './SaveBookmark.svelte';
     import Settings from './Settings.svelte';
     import ResultList from "./ResultList.svelte";
+    import FolderSelection from "./FolderSelection.svelte";
 
     import {searchKeyword} from './repo.js';
 
@@ -15,6 +16,7 @@
         '/': Default,
         '/settings': Settings,
         '/results': ResultList,
+        '/folders':FolderSelection,
         '*': Default
     }
 

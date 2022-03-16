@@ -11,7 +11,8 @@
     "tabs",
     "scripting",
     "bookmarks",
-    "notifications"
+    "notifications",
+    "tts"
   ],
   "background": {
     "service_worker": "background.js",

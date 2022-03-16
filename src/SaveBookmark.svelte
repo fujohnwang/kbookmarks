@@ -1,5 +1,6 @@
 <script>
     import {onMount} from "svelte";
+    import {push, pop, replace} from 'svelte-spa-router';
 
     let title = "";
     let url = "";
@@ -22,6 +23,27 @@
                 comment = response.comment;
             })
         });
+    }
+
+    function openChromeBookmarkPopup() {
+        push('/folders')
+        // console.log("send bookmark key combination to open default bookmark popup...")
+        // window.dispatchEvent(new KeyboardEvent('keydown', {
+        //     'key': 'd',
+        //     shiftKey: false,
+        //     ctrlKey: false,
+        //     metaKey: true
+        // }));
+        // chrome.tts.speak('Hello, world.', {'lang': 'en-US', 'rate': 1.0, 'enqueue': true});
+        //
+        // chrome.bookmarks.getTree(function (nodes) {
+        //     nodes.forEach((node) => {
+        //         if(node.children && node.children.length) {
+        //             console.log("add folder : %o", node)
+        //         }
+        //     })
+        // })
+
     }
 
     function save() {
@@ -48,7 +70,8 @@
             <label class="label" for="title">
                 <span class="label-text">Title</span>
             </label>
-            <input id="title" type="text" placeholder="Type here" class="input input-bordered input-sm w-full" bind:value={title}/>
+            <input id="title" type="text" placeholder="Type here" class="input input-bordered input-sm w-full"
+                   bind:value={title}/>
         </div>
     </div>
     <div class="p-2 w-full">
@@ -57,7 +80,8 @@
                 <span class="label-text">Folder</span>
             </label>
             <div class="inline-flex space-x-2">
-                <select id="parentFolder" class="select select-bordered select-sm w-4/5" bind:value={folderSelected} disabled>
+                <select id="parentFolder" class="select select-bordered select-sm w-4/5" bind:value={folderSelected}
+                        disabled>
                     <option value="volvo">Volvo</option>
                     <option value="saab">Saab</option>
                     <option value="opel">Opel</option>
@@ -68,10 +92,14 @@
                     <!--                    </option>-->
                     <!--                {/each}-->
                 </select>
-                <button class="btn btn-sm btn-ghost w-1/5 bg-transparent text-accent">
-                    More<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                        </svg>
+                <button class="btn btn-sm btn-ghost w-1/5 bg-transparent text-accent"
+                        on:click={openChromeBookmarkPopup}>
+                    More
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                    </svg>
                 </button>
             </div>
 
