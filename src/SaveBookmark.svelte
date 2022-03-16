@@ -2,7 +2,7 @@
     import {onMount} from "svelte";
     import LeafFolderIcon from './tree/LeafFolderIcon.svelte';
     import {push, pop, replace} from 'svelte-spa-router';
-    import {saveFolder} from "./repo";
+    import {showSaveFolder, saveFolder} from "./repo";
 
     let title = "";
     let url = "";
@@ -70,22 +70,23 @@
         <button class="btn btn-block" on:click={save}>Save</button>
     </div>
 
-    <div class="p-2 w-full">
-        <div class="form-control w-full">
-            <label class="label" for="title">
-                <span class="label-text">Save To Folder</span>
-            </label>
-            <div class="inline-flex space-x-2">
-                <div class="form-control w-full">
-                    <label class="input-group input-group-sm">
-                        <span class="cursor-pointer" on:click={()=> push('/folders')}><LeafFolderIcon/></span>
-                        <input id="saveFolderInput" type="text" placeholder="Type here" class="input input-bordered input-sm bg-transparent w-full"
-                               bind:value={$saveFolder} readonly/>
-                    </label>
+    {#if $showSaveFolder}
+        <div class="p-2 w-full">
+            <div class="form-control w-full">
+                <label class="label" for="title">
+                    <span class="label-text">Save To Folder</span>
+                </label>
+                <div class="inline-flex space-x-2">
+                    <div class="form-control w-full">
+                        <label class="input-group input-group-sm">
+                            <span class="cursor-pointer" on:click={()=> push('/folders')}><LeafFolderIcon/></span>
+                            <input id="saveFolderInput" type="text" placeholder="Type here" class="input input-bordered input-sm bg-transparent w-full"
+                                   bind:value={$saveFolder} readonly/>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
+    {/if}
 
 </div>
