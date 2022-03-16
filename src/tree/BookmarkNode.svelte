@@ -1,6 +1,5 @@
 <script>
     import {slide} from 'svelte/transition';
-    import ParentFolderIcon from './ParentFolderIcon.svelte';
     import LeafFolderIcon from './LeafFolderIcon.svelte';
 
     export let node;
@@ -25,8 +24,8 @@
     }
 </script>
 
-<li on:click={toggle} style="padding-left:{level*1}rem" class="cursor-pointer" transition:slide>
-    <div class="flex bg-gray-100 text-center justify-center">
+<li on:click={toggle} style="padding-left:{level*1}rem" class="cursor-pointer bg-transparent" transition:slide>
+    <div class="flex text-center justify-center">
         <LeafFolderIcon/>
         <span>{node.title}</span>
     </div>
@@ -38,12 +37,13 @@
     {/each}
 {/if}
 
+
 <style>
     li {
         border-bottom: solid 1px #eee;
         margin: 0 0;
         padding: 1rem;
-        background: #fafafa;
+        /*background: #fafafa;*/
         display: flex;
     }
 </style>
