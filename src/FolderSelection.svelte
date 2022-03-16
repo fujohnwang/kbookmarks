@@ -1,6 +1,7 @@
 <script>
     import BookmarkFolderTree from "./tree/BookmarkFolderTree.svelte";
     import {onMount} from "svelte";
+    import {pop} from "svelte-spa-router";
 
     let nodes = [];
 
@@ -15,7 +16,7 @@
 
 
 <div class="flex flex-wrap -m-2">
-    <div class="p-2 w-full">
+    <div class="p-2 w-full overflow-auto">
         <BookmarkFolderTree bind:nodes={nodes}/>
     </div>
 
@@ -28,7 +29,7 @@
         </div>
         <div class="flex-none">
             <div class="flex justify-end items-center space-x-2">
-                <button class="btn btn-primary">Cancel</button>
+                <button class="btn btn-primary" on:click={()=> pop()}>Cancel</button>
                 <button class="btn btn-primary">Choose</button>
             </div>
         </div>

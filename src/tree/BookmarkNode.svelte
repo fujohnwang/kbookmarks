@@ -7,12 +7,19 @@
     export let level = 0;
 
     let expanded = false;
+    let subFolders = [];
 
     function toggle() {
         expanded = !expanded;
-        if(expanded) {
-            chrome.bookmarks.getSubTree(node.id, function (results){
+        if (expanded) {
+            subFolders = [];
+            chrome.bookmarks.getSubTree(node.id, function (results) {
                 console.log(`subtree of ${node.title} is: %o`, results)
+                results[0].children.forEach(n => {
+                    if (n.children && !n.url) {
+                        subFolders = [...subFolders, n]
+                    }
+                })
             })
         }
     }
@@ -20,20 +27,16 @@
 
 <li on:click={toggle} style="padding-left:{level*1}rem" class="cursor-pointer" transition:slide>
     <div class="flex bg-gray-100 text-center justify-center">
-            {#if node.children && node.children.length }
-                <ParentFolderIcon/>
-            {:else}
-                <LeafFolderIcon/>
-            {/if}
-            <span>{node.title}</span>
+        <LeafFolderIcon/>
+        <span>{node.title}</span>
     </div>
 </li>
 
-<!--{#if node.children && expanded}-->
-<!--    {#each node.children as child}-->
-<!--        <svelte:self node={child} level={level+1}/>-->
-<!--    {/each}-->
-<!--{/if}-->
+{#if expanded && subFolders && subFolders.length}
+    {#each subFolders as child}
+        <svelte:self node={child} level={level+1}/>
+    {/each}
+{/if}
 
 <style>
     li {
