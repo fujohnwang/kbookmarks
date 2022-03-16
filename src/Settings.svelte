@@ -4,7 +4,7 @@
     import LeafFolderIcon from "./tree/LeafFolderIcon.svelte";
     import {onMount} from 'svelte';
 
-    import {showSaveFolder} from "./repo";
+    import {showSaveFolder, saveFolder} from "./repo";
 
     $: disableDefaultSaveFolder = !$showSaveFolder;
 
@@ -73,7 +73,9 @@
             <label class="input-group input-group-sm">
                 <span class="cursor-pointer"><LeafFolderIcon/></span>
                 <input id="saveFolderInput" type="text" placeholder="Type here"
-                       class="input input-bordered input-sm bg-transparent w-full" disabled={disableDefaultSaveFolder}/>
+                       class="input input-bordered input-sm bg-transparent w-full"
+                       disabled={disableDefaultSaveFolder}
+                       bind:value={$saveFolder}/>
             </label>
         </div>
     </div>
@@ -86,8 +88,8 @@
 
         </div>
         <div class="flex-none">
-            <button class="btn" on:click={()=> pop()}>Cancel</button>
-            <button class="btn">Apply</button>
+            <button class="btn btn-sm" on:click={()=> pop()}>OK</button>
+<!--            <button class="btn">Apply</button>-->
         </div>
     </div>
 </div>

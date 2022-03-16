@@ -10,13 +10,13 @@
     import ResultList from "./ResultList.svelte";
     import FolderSelection from "./FolderSelection.svelte";
 
-    import {searchKeyword} from './repo.js';
+    import {searchKeyword, showSaveFolderStorageKey, saveFolderStorageKey, showSaveFolder, saveFolder} from './repo.js';
 
     const routes = {
         '/': Default,
         '/settings': Settings,
         '/results': ResultList,
-        '/folders':FolderSelection,
+        '/folders': FolderSelection,
         '*': Default
     }
 
@@ -45,6 +45,27 @@
 
     onMount(async () => {
         themeChange(false)
+
+        // load settings
+        chrome.storage.sync.get([showSaveFolderStorageKey], function (result) {
+            console.log(`showSaveFolderStorageKey: %o`, result)
+            let value = result[showSaveFolderStorageKey]
+            if (value) {
+                console.log(`load and set showSaveFolder store value: ${value} `)
+                $showSaveFolder = value;
+            }
+        })
+
+        chrome.storage.sync.get([saveFolderStorageKey], function (result) {
+            console.log(`saveFolderStorageKey: %o`, result)
+            let value = result[saveFolderStorageKey]
+            if (value) {
+                console.log(`load and set saveFolder store value: ${value} `)
+                $saveFolder = value;
+            }
+        })
+
+
     })
 
 </script>
@@ -109,7 +130,7 @@
             <div class="item">
                 <div class="tooltip tooltip-right" data-tip="change theme">
                     <label for="theme-select">
-<!--                        <span class="bg-transparent text-secondary">Change Theme</span>-->
+                        <!--                        <span class="bg-transparent text-secondary">Change Theme</span>-->
                         <select id="theme-select" data-choose-theme class="select text-accent">
                             <option value="Business">DEFAULT</option>
                             <option value="dark">DARK</option>
