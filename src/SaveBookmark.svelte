@@ -29,19 +29,21 @@
     function save() {
         // save bookmark and then
         getBookmarkIdByTitle($saveFolder, function (id) {
-            if (id) {
-                chrome.runtime.sendMessage({
+            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                let tab = tabs[0];
+                let payload = {
                     typ: "save",
                     parentFolderId: id,
                     title: title,
-                    comment: comment
-                }).then((v) => {
+                    comment: comment,
+                    url: tab.url
+                }
+                console.log(`send save request with payload: %o`, payload)
+                chrome.runtime.sendMessage(payload).then((v) => {
                     console.log("receives response when saved: %o", v)
                     window.close();
                 });
-            } else {
-                console.log(`no parent folder found with title='${$saveFolder}'`);
-            }
+            })
         })
     }
 

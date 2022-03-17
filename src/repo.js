@@ -28,6 +28,8 @@ export const showSaveFolder = persistStore(showSaveFolderStorageKey, false)
 
 export const saveFolder = persistStore(saveFolderStorageKey, 'kBookmarks');
 
+export const selectedLiElement = writable(null);
+export const selectedLiElementText = writable('');
 
 export function itemExists(results) {
     return results && Array.isArray(results) && results.length;
@@ -37,6 +39,7 @@ export function getBookmarkIdByTitle(title, callback) {
     chrome.bookmarks.search({
         title: title
     }, function (result) {
+        console.log(`getBookmarkIdByTitle:'${title}' with result: %o`, result)
         if (itemExists(result)) {
             callback(result[0].id)
         } else {

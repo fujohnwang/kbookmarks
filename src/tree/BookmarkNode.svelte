@@ -1,6 +1,7 @@
 <script>
     import {slide} from 'svelte/transition';
     import LeafFolderIcon from './LeafFolderIcon.svelte';
+    import {selectedLiElement, selectedLiElementText} from '../repo.js';
 
     export let node;
     export let level = 0;
@@ -22,9 +23,27 @@
             })
         }
     }
+
+    let liElement;
+    let selectedBgCss = "bg-warning"
+
+    function select(e) {
+        if (liElement.classList.contains(selectedBgCss)) {
+            liElement.classList.remove(selectedBgCss)
+        } else {
+            // 1. clear other elements' bg color simultaneously
+            if ($selectedLiElement)
+                $selectedLiElement.classList.remove(selectedBgCss)
+            // 2. init new selected li element
+            liElement.classList.add(selectedBgCss)
+            $selectedLiElement = liElement;
+            $selectedLiElementText = node.title;
+        }
+    }
 </script>
 
-<li on:click={toggle} style="padding-left:{level*1}rem" class="cursor-pointer bg-transparent" transition:slide>
+<li on:click={toggle} style="padding-left:{level*1}rem" class="cursor-pointer bg-transparent" transition:slide
+    on:click={select} bind:this={liElement}>
     <div class="flex text-center justify-center">
         <LeafFolderIcon/>
         <span>{node.title}</span>

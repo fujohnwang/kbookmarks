@@ -2,8 +2,17 @@
     import BookmarkFolderTree from "./tree/BookmarkFolderTree.svelte";
     import {onMount} from "svelte";
     import {pop} from "svelte-spa-router";
+    import {saveFolder, selectedLiElement, selectedLiElementText} from './repo.js';
 
     let nodes = [];
+
+    function updateSaveFolder() {
+        if ($selectedLiElement) {
+            if ($selectedLiElementText)
+                $saveFolder = $selectedLiElementText;
+        }
+        pop()
+    }
 
     onMount(async () => {
         chrome.bookmarks.getTree(function (results) {
@@ -30,7 +39,7 @@
         <div class="flex-none">
             <div class="flex justify-end items-center space-x-2">
                 <button class="btn btn-primary" on:click={()=> pop()}>Cancel</button>
-                <button class="btn btn-primary">Choose</button>
+                <button class="btn btn-primary" on:click={updateSaveFolder}>Choose</button>
             </div>
         </div>
     </div>

@@ -98,76 +98,79 @@ chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         let title = request.title;
         let comment = request.comment;
+        let url = request.url;
+        let parentFolderId = request.parentFolderId;
 
         if (request.typ === "save") {
-            let parentId = request.parentFolderId;
+            bookmarkExists(title, url, (items) => {
+                if (itemExists(items)) {
+                    let existingBookmark = items[0]
+                    console.log("update the bookmark: %o", existingBookmark)
+                    chrome.bookmarks.update(existingBookmark.id, {
+                        title: title, url: url
+                    }, function (result) {
+                        console.log(`update bookmark: ${existingBookmark.id} with title=${title} and url = ${url}`)
+                    });
 
-            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                let tab = tabs[0];
-                console.log(`receives message: ${title}, ${tab.url}, message=${comment}`);
+                    let wrapBookmark = {
+                        ...existingBookmark,
+                        comment: comment
+                    }
+                    console.log("update bookmark with enhanced comment: %o", wrapBookmark)
+                    updateMeta(wrapBookmark)
 
-                bookmarkExists(title, tab.url, (items) => {
-                    if (itemExists(items)) {
-                        let existingBookmark = items[0]
-                        console.log("update the bookmark: %o", existingBookmark)
-                        chrome.bookmarks.update(existingBookmark.id, {
-                            title: title, url: tab.url
-                        }, function (result) {
-                            console.log(`update bookmark: ${existingBookmark.id} with title=${title} and url = ${tab.url}`)
-                        });
+                    chrome.notifications.create('kBookmarkNotification', {
+                        title: "Success",
+                        message: "bookmark updated successfully.",
+                        iconUrl: "icon.jpg",
+                        type: 'basic',
+                        priority: 2
+                    }, function (id) {
+                        // callback if necessary
+                    })
 
-                        let wrapBookmark = {
-                            ...existingBookmark,
+                } else {
+                    console.log("create raw bookmark of chrome into folder with id=%s", parentFolderId)
+                    let createDetail = {
+                        title: title,
+                        url: url
+                    };
+                    if (parentFolderId) {
+                        createDetail = {
+                            parentId: parentFolderId,
+                            ...createDetail
+                        }
+                    }
+                    chrome.bookmarks.create(createDetail, function (result) {
+                        // 2. add comment and bookmark to indexedDB
+                        const enhancedBookmark = {
+                            ...result,
                             comment: comment
                         }
-                        console.log("update bookmark with enhanced comment: %o", wrapBookmark)
-                        updateMeta(wrapBookmark)
+                        console.log("add enhanced bookmark to indexed db: %o", enhancedBookmark)
+                        appendMeta(enhancedBookmark)
 
                         chrome.notifications.create('kBookmarkNotification', {
                             title: "Success",
-                            message: "bookmark updated successfully.",
+                            message: "bookmark added successfully.",
                             iconUrl: "icon.jpg",
                             type: 'basic',
                             priority: 2
                         }, function (id) {
                             // callback if necessary
                         })
-
-                    } else {
-                        console.log("1. create raw bookmark of chrome into folder with id=" + parentId)
-                        chrome.bookmarks.create({
-                            'parentId': parentId,
-                            'title': title,
-                            'url': tab.url
-                        }, function (result) {
-                            // 2. add comment and bookmark to indexedDB
-                            const enhancedBookmark = {
-                                ...result,
-                                comment: comment
-                            }
-                            console.log("add enhanced bookmark to indexed db: %o", enhancedBookmark)
-                            appendMeta(enhancedBookmark)
-
-                            chrome.notifications.create('kBookmarkNotification', {
-                                title: "Success",
-                                message: "bookmark added successfully.",
-                                iconUrl: "icon.jpg",
-                                type: 'basic',
-                                priority: 2
-                            }, function (id) {
-                                // callback if necessary
-                            })
-                        })
-                    }
-                    sendResponse({message: "done!"});
-                });
+                    })
+                }
+                sendResponse({message: "done!"});
             });
+
             return true;
         }
         if (request.typ === "load") {
-            bookmarkExists(title, comment, function (items) {
+            bookmarkExists(title, url, function (items) {
                 if (itemExists(items)) {
                     let existingBookmark = items[0]
+                    console.log(`load comment for bookmark: %o`, existingBookmark)
                     doWith(function (store) {
                         let query = store.get(existingBookmark.id)
                         query.onerror = (event) => {
