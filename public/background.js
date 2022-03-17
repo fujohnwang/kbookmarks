@@ -1,5 +1,4 @@
 const kBookmarkFolderName = "kBookmarks"
-const kBookmarkFolderIdSyncKey = "com.keevol.kbookmarks.folder.id"
 const kBookmarkIndexedDBName = "kbookmarksIdb"
 const kBookmarkIdbStoreName = "kbookmarksMetaStore"
 
@@ -11,28 +10,12 @@ chrome.runtime.onInstalled.addListener(e => {
     chrome.bookmarks.search({title: kBookmarkFolderName}, function (results) {
         if (itemExists(results)) {
             console.log(`bookmark folder: ${kBookmarkFolderName} exists, ignore to avoid recreating it.`)
-            let id = results[0].id;
-            chrome.storage.sync.set({[kBookmarkFolderIdSyncKey]: id}, function () {
-                if (chrome.runtime.lastError) {
-                    console.log(`ERROR: chrome.runtime.error, fails to sync bookmark folder id to storage.`)
-                } else {
-                    console.log(`set ${id} as value of ${kBookmarkFolderIdSyncKey} to chrome.storage.sync`);
-                }
-            });
         } else {
             console.log(`create bookmark folder: ${kBookmarkFolderName} at extension installation.`)
             chrome.bookmarks.create(
                 {'title': kBookmarkFolderName},
                 function (newFolder) {
                     console.log(`create bookmark folder [${kBookmarkFolderName}] for kBookmark extension with id=${newFolder.id}`)
-
-                    chrome.storage.sync.set({[kBookmarkFolderIdSyncKey]: newFolder.id}, function () {
-                        if (chrome.runtime.lastError) {
-                            console.log(`ERROR: chrome.runtime.error, fails to sync bookmark folder id to storage.`)
-                        } else {
-                            console.log(`set ${newFolder.id} as value of ${kBookmarkFolderIdSyncKey} to chrome.storage.sync`);
-                        }
-                    });
                 }
             );
         }
@@ -117,9 +100,11 @@ chrome.runtime.onMessage.addListener(
         let comment = request.comment;
 
         if (request.typ === "save") {
+            let parentId = request.parentFolderId;
+
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
                 let tab = tabs[0];
-                console.log(`receives message: ${title}, ${tab.url}, message=${comment}`)
+                console.log(`receives message: ${title}, ${tab.url}, message=${comment}`);
 
                 bookmarkExists(title, tab.url, (items) => {
                     if (itemExists(items)) {
@@ -149,37 +134,30 @@ chrome.runtime.onMessage.addListener(
                         })
 
                     } else {
-                        chrome.storage.sync.get([kBookmarkFolderIdSyncKey], function (result) {
-                            if (chrome.runtime.lastError) {
-                                console.log(`ERROR: fails to get folder id from storage.sync with result=${result}`)
-                            } else {
-                                const parentFolderId = result[kBookmarkFolderIdSyncKey];
-                                console.log("1. create raw bookmark of chrome into folder with id=" + parentFolderId)
-                                chrome.bookmarks.create({
-                                    'parentId': parentFolderId,
-                                    'title': title,
-                                    'url': tab.url
-                                }, function (result) {
-                                    // 2. add comment and bookmark to indexedDB
-                                    const enhancedBookmark = {
-                                        ...result,
-                                        comment: comment
-                                    }
-                                    console.log("add enhanced bookmark to indexed db: %o", enhancedBookmark)
-                                    appendMeta(enhancedBookmark)
-
-                                    chrome.notifications.create('kBookmarkNotification', {
-                                        title: "Success",
-                                        message: "bookmark added successfully.",
-                                        iconUrl: "icon.jpg",
-                                        type: 'basic',
-                                        priority: 2
-                                    }, function (id) {
-                                        // callback if necessary
-                                    })
-                                })
+                        console.log("1. create raw bookmark of chrome into folder with id=" + parentId)
+                        chrome.bookmarks.create({
+                            'parentId': parentId,
+                            'title': title,
+                            'url': tab.url
+                        }, function (result) {
+                            // 2. add comment and bookmark to indexedDB
+                            const enhancedBookmark = {
+                                ...result,
+                                comment: comment
                             }
-                        });
+                            console.log("add enhanced bookmark to indexed db: %o", enhancedBookmark)
+                            appendMeta(enhancedBookmark)
+
+                            chrome.notifications.create('kBookmarkNotification', {
+                                title: "Success",
+                                message: "bookmark added successfully.",
+                                iconUrl: "icon.jpg",
+                                type: 'basic',
+                                priority: 2
+                            }, function (id) {
+                                // callback if necessary
+                            })
+                        })
                     }
                     sendResponse({message: "done!"});
                 });

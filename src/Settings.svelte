@@ -44,7 +44,7 @@
     </div>
 
 
-    <div class="p-2 w-full overflow-auto">
+    <div class="p-2 w-full">
         <div class="form-control">
             <span class="label-text">Show Save Folder At Save Bookmark</span>
             <div id="swap" class="input-group">
@@ -67,15 +67,15 @@
             </div>
         </div>
     </div>
-    <div class="p-2 w-full overflow-auto">
+    <div class="p-2 w-full">
         <div class="form-control w-full">
             <span class="label-text">Default Save Folder</span>
             <label class="input-group input-group-sm">
-                <span class="cursor-pointer"><LeafFolderIcon/></span>
-                <input id="saveFolderInput" type="text" placeholder="Type here"
-                       class="input input-bordered input-sm bg-transparent w-full"
+                <span class="cursor-pointer" on:click={()=> push('/folders')}><LeafFolderIcon/></span>
+                <input id="saveFolderInput" type="text"
+                       class="input input-bordered bg-transparent w-full"
                        disabled={disableDefaultSaveFolder}
-                       bind:value={$saveFolder}/>
+                       value={$saveFolder} readonly/>
             </label>
         </div>
     </div>

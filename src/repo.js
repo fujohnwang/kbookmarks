@@ -15,7 +15,7 @@ export const persistStore = (key, initial) => {
         subscribe,
         set: value => {
             set(value)
-            chrome.storage.sync.set({[key]: value}, function (){
+            chrome.storage.sync.set({[key]: value}, function () {
                 console.log(`store value: ${value} with key:${key} successfully.`)
             })
         }
@@ -27,3 +27,20 @@ export const searchKeyword = writable('');
 export const showSaveFolder = persistStore(showSaveFolderStorageKey, false)
 
 export const saveFolder = persistStore(saveFolderStorageKey, 'kBookmarks');
+
+
+export function itemExists(results) {
+    return results && Array.isArray(results) && results.length;
+}
+
+export function getBookmarkIdByTitle(title, callback) {
+    chrome.bookmarks.search({
+        title: title
+    }, function (result) {
+        if (itemExists(result)) {
+            callback(result[0].id)
+        } else {
+            callback('')
+        }
+    });
+}

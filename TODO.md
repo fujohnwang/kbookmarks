@@ -20,3 +20,5 @@
 - [X] replace raw IndexedDB with [jsStore](https://jsstore.net/)
     - since currently the search and open/close issues are still buggy with raw IndexedDB
     - No need anymore, we have fix bug on search with IndexedDB.
+- [ ] generalize bookmark message passing with parentId + title + url
+

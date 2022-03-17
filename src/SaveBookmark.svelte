@@ -2,14 +2,14 @@
     import {onMount} from "svelte";
     import LeafFolderIcon from './tree/LeafFolderIcon.svelte';
     import {push, pop, replace} from 'svelte-spa-router';
-    import {showSaveFolder, saveFolder} from "./repo";
+    import {showSaveFolder, saveFolder, getBookmarkIdByTitle} from "./repo";
 
     let title = "";
     let url = "";
     let comment = "";
 
     function updateViewAtPopup() {
-        // TODO load default folder or latest folder
+        // TODO load default folder or latest folder???
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             let tab = tabs[0];
             title = tab.title;
@@ -25,16 +25,24 @@
         });
     }
 
+
     function save() {
         // save bookmark and then
-        chrome.runtime.sendMessage({
-            typ: "save",
-            title: title,
-            comment: comment
-        }).then((v) => {
-            console.log("receives response when saved: %o", v)
-            window.close();
-        });
+        getBookmarkIdByTitle($saveFolder, function (id) {
+            if (id) {
+                chrome.runtime.sendMessage({
+                    typ: "save",
+                    parentFolderId: id,
+                    title: title,
+                    comment: comment
+                }).then((v) => {
+                    console.log("receives response when saved: %o", v)
+                    window.close();
+                });
+            } else {
+                console.log(`no parent folder found with title='${$saveFolder}'`);
+            }
+        })
     }
 
     onMount(async () => {
@@ -80,7 +88,8 @@
                     <div class="form-control w-full">
                         <label class="input-group input-group-sm">
                             <span class="cursor-pointer" on:click={()=> push('/folders')}><LeafFolderIcon/></span>
-                            <input id="saveFolderInput" type="text" placeholder="Type here" class="input input-bordered input-sm bg-transparent w-full"
+                            <input id="saveFolderInput" type="text" placeholder="Type here"
+                                   class="input input-bordered input-sm bg-transparent w-full"
                                    bind:value={$saveFolder} readonly/>
                         </label>
                     </div>
