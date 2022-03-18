@@ -29,6 +29,7 @@ export const showSaveFolder = persistStore(showSaveFolderStorageKey, false)
 export const saveFolder = persistStore(saveFolderStorageKey, 'kBookmarks');
 
 export const selectedLiElement = writable(null);
+export const selectedLiElementNode = writable(null);
 export const selectedLiElementText = writable('');
 
 export function itemExists(results) {

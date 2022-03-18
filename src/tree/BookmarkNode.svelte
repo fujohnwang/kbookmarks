@@ -1,15 +1,17 @@
 <script>
     import {slide} from 'svelte/transition';
     import LeafFolderIcon from './LeafFolderIcon.svelte';
-    import {selectedLiElement, selectedLiElementText} from '../repo.js';
+    import {selectedLiElement, selectedLiElementText, selectedLiElementNode} from '../repo.js';
+    import {onMount} from "svelte";
 
+    export let initialSelectedNodeTitle;
     export let node;
     export let level = 0;
 
     let expanded = false;
     let subFolders = [];
 
-    function toggle() {
+    function toggle(e) {
         expanded = !expanded;
         if (expanded) {
             subFolders = [];
@@ -27,7 +29,7 @@
     let liElement;
     let selectedBgCss = "bg-warning"
 
-    function select(e) {
+    function select() {
         if (liElement.classList.contains(selectedBgCss)) {
             liElement.classList.remove(selectedBgCss)
         } else {
@@ -37,12 +39,19 @@
             // 2. init new selected li element
             liElement.classList.add(selectedBgCss)
             $selectedLiElement = liElement;
+            $selectedLiElementNode = node;
             $selectedLiElementText = node.title;
         }
     }
+
+    onMount(async () => {
+        if(node.title === initialSelectedNodeTitle){
+            select()
+        }
+    })
 </script>
 
-<li on:click={toggle} style="padding-left:{level*1}rem" class="cursor-pointer bg-transparent" transition:slide
+<li on:dblclick={toggle} style="padding-left:{level*1}rem" class="cursor-pointer bg-transparent" transition:slide
     on:click={select} bind:this={liElement}>
     <div class="flex text-center justify-center">
         <LeafFolderIcon/>
