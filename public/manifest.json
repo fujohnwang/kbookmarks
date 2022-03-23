@@ -9,10 +9,8 @@
     "unlimitedStorage",
     "activeTab",
     "tabs",
-    "scripting",
     "bookmarks",
-    "notifications",
-    "tts"
+    "notifications"
   ],
   "background": {
     "service_worker": "background.js",
