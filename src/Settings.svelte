@@ -10,8 +10,33 @@
 
     // TODO sync with store or remote in the future
     let syncDisabled = true;
-    let importDisabled = true;
-    let exportDisabled = true;
+    let importDisabled = false;
+    let exportDisabled = false;
+
+    async function importBookmarks() {
+        const [fileHandle] = await window.showOpenFilePicker();
+        const file = await fileHandle.getFile();
+        const contents = await file.text();
+        console.log(contents)
+    }
+
+    async function exportBookmarks() {
+        const fileHandle = await window.showSaveFilePicker({
+            suggestedName: `kbookmarks-${new Date().toISOString().slice(0, 10)}.json`,
+            startIn: 'desktop',
+            types: [
+                {
+                    description: 'kBookmark Persistent Files',
+                    accept: {
+                        'application/json': ['.json'],
+                    },
+                },
+            ]
+        });
+        const writable = await fileHandle.createWritable();
+        await writable.write("{'content': 'iterate bookmark tree to generate content'}");
+        await writable.close();
+    }
 
     onMount(async () => {
 
@@ -43,9 +68,11 @@
 
         </div>
         <div class="flex-none">
-            <button class="btn btn-sm  btn-outline" data-tip="not done yet" disabled={importDisabled}>Import
+            <button class="btn btn-sm  btn-outline" data-tip="not done yet" disabled={importDisabled}
+                    on:click={importBookmarks}>Import
             </button>
-            <button class="btn btn-sm  btn-outline" data-tip="not done yet" disabled={exportDisabled}>Export
+            <button class="btn btn-sm  btn-outline" data-tip="not done yet" disabled={exportDisabled}
+                    on:click={exportBookmarks}>Export
             </button>
         </div>
     </div>
