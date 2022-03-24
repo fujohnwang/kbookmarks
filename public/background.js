@@ -6,7 +6,8 @@ function itemExists(results) {
     return results && Array.isArray(results) && results.length;
 }
 
-chrome.runtime.onInstalled.addListener(e => {
+chrome.runtime.onInstalled.addListener(async (e) => {
+    // 1. create default kBookmarks folder if necessary
     chrome.bookmarks.search({title: kBookmarkFolderName}, function (results) {
         if (itemExists(results)) {
             console.log(`bookmark folder: ${kBookmarkFolderName} exists, ignore to avoid recreating it.`)
@@ -21,6 +22,7 @@ chrome.runtime.onInstalled.addListener(e => {
         }
     });
 
+    // 2. create kBookmarks IndexedDB if necessary
     console.log(`init indexedDB: ${kBookmarkIndexedDBName}  for kbookmark...`)  // <<<<<
     const request = indexedDB.open(kBookmarkIndexedDBName, 1);// <<<<<
     request.onerror = (event) => {
@@ -42,19 +44,48 @@ chrome.runtime.onInstalled.addListener(e => {
             store.createIndex('commentIdx', 'comment', {
                 unique: false
             });
+
+            // 3. import and index existing bookmarks of chrome if necessary
+            chrome.bookmarks.getTree(function (results) {
+                // console.log('dump tree: %o', results)
+                importAllExistingBookmarks(results, store)
+            })
+
         }
     };
 })
 
+
+function importAllExistingBookmarks(nodes, store) {
+    if (itemExists(nodes)) {
+        nodes.forEach(n => {
+            if (n.children) {
+                importAllExistingBookmarks(n.children, null)
+            } else {
+                addBookmark({
+                    ...n,
+                    comment: ''
+                }, store)
+            }
+        })
+    } else {
+        return
+    }
+}
+
+function addBookmark(bookmark, store) {
+    let query = store.add(bookmark);
+    query.onsuccess = function (event) {
+        console.log(event);
+    };
+    query.onerror = function (event) {
+        console.log(event.target.errorCode);
+    }
+}
+
 function appendMeta(bookmark) {
     doWith(function (store) {
-        let query = store.add(bookmark);
-        query.onsuccess = function (event) {
-            console.log(event);
-        };
-        query.onerror = function (event) {
-            console.log(event.target.errorCode);
-        }
+        addBookmark(bookmark, store)
     })
 }
 
