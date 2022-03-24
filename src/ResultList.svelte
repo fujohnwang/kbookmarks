@@ -30,6 +30,8 @@
         chrome.tabs.create({url: url})
     }
 
+    $: search($searchKeyword) // TO refresh result list on condition change
+
     onMount(async () => {
         console.log("start search with keyword=" + $searchKeyword)
         search($searchKeyword);

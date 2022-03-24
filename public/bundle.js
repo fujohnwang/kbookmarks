@@ -20225,7 +20225,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (41:4) {#if bookmarks && bookmarks.length}
+    // (43:4) {#if bookmarks && bookmarks.length}
     function create_if_block$1(ctx) {
     	let each_1_anchor;
     	let each_value = /*bookmarks*/ ctx[0];
@@ -20286,14 +20286,14 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(41:4) {#if bookmarks && bookmarks.length}",
+    		source: "(43:4) {#if bookmarks && bookmarks.length}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (42:8) {#each bookmarks as bk}
+    // (44:8) {#each bookmarks as bk}
     function create_each_block$2(ctx) {
     	let div1;
     	let div0;
@@ -20319,12 +20319,12 @@ var app = (function () {
     			t2 = text(t2_value);
     			t3 = space();
     			attr_dev(h2, "class", "card-title");
-    			add_location(h2, file$4, 44, 20, 1319);
-    			add_location(p, file$4, 45, 20, 1378);
+    			add_location(h2, file$4, 46, 20, 1396);
+    			add_location(p, file$4, 47, 20, 1455);
     			attr_dev(div0, "class", "card-body cursor-pointer");
-    			add_location(div0, file$4, 43, 16, 1231);
+    			add_location(div0, file$4, 45, 16, 1308);
     			attr_dev(div1, "class", "card w-full bg-base-100 m-1");
-    			add_location(div1, file$4, 42, 12, 1173);
+    			add_location(div1, file$4, 44, 12, 1250);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -20367,7 +20367,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(42:8) {#each bookmarks as bk}",
+    		source: "(44:8) {#each bookmarks as bk}",
     		ctx
     	});
 
@@ -20383,7 +20383,7 @@ var app = (function () {
     			div = element("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "space-y-1 m-1");
-    			add_location(div, file$4, 39, 0, 1061);
+    			add_location(div, file$4, 41, 0, 1138);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -20484,7 +20484,13 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [bookmarks];
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$searchKeyword*/ 2) {
+    			search($searchKeyword); // TO refresh result list on condition change
+    		}
+    	};
+
+    	return [bookmarks, $searchKeyword];
     }
 
     class ResultList extends SvelteComponentDev {
@@ -21747,94 +21753,94 @@ var app = (function () {
     			path2 = svg_element("path");
     			path3 = svg_element("path");
     			attr_dev(a0, "href", "/");
-    			add_location(a0, file, 76, 65, 2274);
+    			add_location(a0, file, 77, 65, 2346);
     			attr_dev(h1, "class", "text-3xl font-extrabold text-primary");
-    			add_location(h1, file, 76, 16, 2225);
+    			add_location(h1, file, 77, 16, 2297);
     			attr_dev(div0, "class", "flex-1");
-    			add_location(div0, file, 75, 12, 2188);
+    			add_location(div0, file, 76, 12, 2260);
     			attr_dev(input, "type", "text");
     			attr_dev(input, "placeholder", "Search...");
     			attr_dev(input, "class", "input input-bordered");
-    			add_location(input, file, 79, 16, 2417);
+    			add_location(input, file, 80, 16, 2489);
     			attr_dev(div1, "class", "form-control w-full flex-auto ml-4 -mr-2");
-    			add_location(div1, file, 78, 12, 2346);
+    			add_location(div1, file, 79, 12, 2418);
     			attr_dev(div2, "class", "navbar bg-base-100 w-full");
-    			add_location(div2, file, 74, 8, 2136);
+    			add_location(div2, file, 75, 8, 2208);
     			attr_dev(div3, "class", "lg:w-1/2 md:w-2/3 mx-auto");
-    			add_location(div3, file, 84, 8, 2623);
+    			add_location(div3, file, 85, 8, 2711);
     			attr_dev(path0, "d", "M2050 3963 c-200 -25 -423 -92 -612 -181 -642 -304 -1065 -950 -1095\n-1672 -14 -343 65 -679 235 -1000 88 -166 257 -381 395 -502 40 -35 74 -66 77\n-69 12 -14 160 -118 219 -155 72 -44 304 -155 310 -148 6 6 -137 218 -207 305\n-76 96 -130 142 -229 193 -46 24 -79 48 -81 59 -6 33 160 91 398 137 189 37\n304 109 580 363 237 219 412 416 493 555 92 158 121 260 121 432 1 156 0 156\n-171 319 l-126 120 95 44 c52 24 99 50 103 58 16 25 -148 163 -364 306 -314\n207 -340 219 -510 233 -143 11 -270 -2 -333 -34 -73 -38 -162 -109 -269 -216\n-129 -128 -166 -186 -184 -286 -22 -123 -19 -256 8 -335 52 -153 217 -370 321\n-424 50 -25 72 -30 155 -33 115 -5 194 13 295 66 84 44 155 111 192 183 26 49\n29 63 29 159 0 94 -3 111 -29 167 -15 34 -38 71 -50 82 -32 30 -223 101 -271\n101 -44 0 -104 -25 -177 -71 -57 -37 -92 -36 -96 3 -3 21 7 39 42 76 132 141\n352 156 582 39 213 -108 268 -287 159 -524 -55 -120 -189 -282 -283 -341 -93\n-59 -137 -67 -352 -67 -177 0 -201 2 -260 23 -174 60 -337 253 -386 457 -20\n84 -23 291 -5 410 31 204 83 305 240 468 225 234 485 357 753 357 110 0 201\n-22 353 -86 177 -73 321 -155 581 -326 272 -180 382 -245 665 -394 249 -130\n299 -161 379 -233 l55 -50 -68 -132 c-43 -81 -69 -143 -69 -163 0 -17 10 -63\n22 -103 12 -39 20 -88 18 -109 -3 -38 -4 -39 -43 -42 -49 -4 -87 23 -155 106\n-119 147 -140 160 -140 95 1 -53 26 -104 126 -254 141 -211 174 -331 119 -425\n-14 -24 -45 -103 -69 -176 -24 -73 -63 -181 -85 -240 -23 -59 -52 -154 -66\n-210 -21 -91 -75 -421 -75 -463 0 -32 180 106 320 245 190 189 293 332 398\n557 126 268 182 521 182 822 0 644 -306 1224 -842 1598 -112 79 -357 199 -490\n242 -207 65 -321 83 -568 86 -124 2 -241 1 -260 -2z");
-    			add_location(path0, file, 98, 32, 3348);
+    			add_location(path0, file, 99, 32, 3436);
     			attr_dev(path1, "d", "M2996 961 c-36 -24 -80 -79 -154 -191 -31 -47 -111 -153 -177 -235\n-142 -178 -197 -261 -235 -352 l-27 -68 35 -3 c74 -7 354 53 500 107 127 47\n254 112 248 127 -17 43 -28 113 -51 302 -26 225 -39 298 -57 319 -15 19 -48\n16 -82 -6z");
-    			add_location(path1, file, 120, 32, 5007);
+    			add_location(path1, file, 121, 32, 5095);
     			attr_dev(g, "transform", "translate(0.000000,414.000000) scale(0.100000,-0.100000)");
     			attr_dev(g, "fill", "red");
     			attr_dev(g, "stroke", "none");
-    			add_location(g, file, 96, 28, 3187);
+    			add_location(g, file, 97, 28, 3275);
     			attr_dev(svg0, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg0, "width", "30.000000pt");
     			attr_dev(svg0, "height", "30.000000pt");
     			attr_dev(svg0, "viewBox", "0 0 450.000000 414.000000");
     			attr_dev(svg0, "preserveAspectRatio", "xMidYMid meet");
-    			add_location(svg0, file, 93, 24, 2947);
+    			add_location(svg0, file, 94, 24, 3035);
     			attr_dev(a1, "href", "https://keevol.cn/");
-    			add_location(a1, file, 92, 20, 2893);
+    			add_location(a1, file, 93, 20, 2981);
     			attr_dev(div4, "class", "flex items-center");
-    			add_location(div4, file, 91, 16, 2841);
+    			add_location(div4, file, 92, 16, 2929);
     			attr_dev(div5, "class", "flex-none");
-    			add_location(div5, file, 90, 12, 2801);
+    			add_location(div5, file, 91, 12, 2889);
     			option0.__value = "Business";
     			option0.value = option0.__value;
-    			add_location(option0, file, 134, 28, 5771);
+    			add_location(option0, file, 135, 28, 5859);
     			option1.__value = "dark";
     			option1.value = option1.__value;
-    			add_location(option1, file, 135, 28, 5841);
+    			add_location(option1, file, 136, 28, 5929);
     			option2.__value = "dracula";
     			option2.value = option2.__value;
-    			add_location(option2, file, 136, 28, 5904);
+    			add_location(option2, file, 137, 28, 5992);
     			option3.__value = "luxury";
     			option3.value = option3.__value;
-    			add_location(option3, file, 137, 28, 5973);
+    			add_location(option3, file, 138, 28, 6061);
     			option4.__value = "Coffee";
     			option4.value = option4.__value;
-    			add_location(option4, file, 138, 28, 6040);
+    			add_location(option4, file, 139, 28, 6128);
     			attr_dev(select, "id", "theme-select");
     			attr_dev(select, "data-choose-theme", "");
     			attr_dev(select, "class", "select text-accent");
-    			add_location(select, file, 133, 24, 5671);
+    			add_location(select, file, 134, 24, 5759);
     			attr_dev(label, "for", "theme-select");
-    			add_location(label, file, 131, 20, 5501);
+    			add_location(label, file, 132, 20, 5589);
     			attr_dev(div6, "class", "tooltip tooltip-right");
     			attr_dev(div6, "data-tip", "change theme");
-    			add_location(div6, file, 130, 16, 5421);
+    			add_location(div6, file, 131, 16, 5509);
     			attr_dev(div7, "class", "item");
-    			add_location(div7, file, 129, 12, 5386);
+    			add_location(div7, file, 130, 12, 5474);
     			attr_dev(path2, "stroke-linecap", "round");
     			attr_dev(path2, "stroke-linejoin", "round");
     			attr_dev(path2, "d", "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z");
-    			add_location(path2, file, 149, 28, 6639);
+    			add_location(path2, file, 150, 28, 6727);
     			attr_dev(path3, "stroke-linecap", "round");
     			attr_dev(path3, "stroke-linejoin", "round");
     			attr_dev(path3, "d", "M15 12a3 3 0 11-6 0 3 3 0 016 0z");
-    			add_location(path3, file, 151, 28, 7244);
+    			add_location(path3, file, 152, 28, 7332);
     			attr_dev(svg1, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg1, "class", "h-6 w-6");
     			attr_dev(svg1, "fill", "none");
     			attr_dev(svg1, "viewBox", "0 0 24 24");
     			attr_dev(svg1, "stroke", "currentColor");
     			attr_dev(svg1, "stroke-width", "2");
-    			add_location(svg1, file, 147, 24, 6454);
+    			add_location(svg1, file, 148, 24, 6542);
     			attr_dev(button, "class", "btn btn-ghost gap-2 bg-transparent text-accent");
-    			add_location(button, file, 145, 20, 6311);
+    			add_location(button, file, 146, 20, 6399);
     			attr_dev(div8, "class", "flex justify-between items-center space-x-0.5");
-    			add_location(div8, file, 144, 16, 6231);
+    			add_location(div8, file, 145, 16, 6319);
     			attr_dev(div9, "class", "item");
-    			add_location(div9, file, 143, 12, 6196);
+    			add_location(div9, file, 144, 12, 6284);
     			attr_dev(div10, "class", "flex justify-between items-center mt-3 space-x-2 w-auto");
-    			add_location(div10, file, 89, 8, 2719);
+    			add_location(div10, file, 90, 8, 2807);
     			attr_dev(div11, "class", "container px-5 py-5 mx-auto");
-    			add_location(div11, file, 73, 4, 2086);
+    			add_location(div11, file, 74, 4, 2158);
     			attr_dev(section, "class", "text-gray-600 body-font relative");
-    			add_location(section, file, 72, 0, 2031);
+    			add_location(section, file, 73, 0, 2103);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -21884,9 +21890,8 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					action_destroyer(link.call(null, a0)),
-    					listen_dev(input, "input", /*handleInput*/ ctx[1], false, false, false),
-    					listen_dev(input, "keypress", /*onEnter*/ ctx[2], false, false, false),
-    					listen_dev(button, "click", /*goSettings*/ ctx[3], false, false, false)
+    					listen_dev(input, "keypress", /*onEnter*/ ctx[1], false, false, false),
+    					listen_dev(button, "click", /*goSettings*/ ctx[2], false, false, false)
     				];
 
     				mounted = true;
@@ -21926,11 +21931,11 @@ var app = (function () {
     	let $showSaveFolder;
     	let $searchKeyword;
     	validate_store(saveFolder, 'saveFolder');
-    	component_subscribe($$self, saveFolder, $$value => $$invalidate(4, $saveFolder = $$value));
+    	component_subscribe($$self, saveFolder, $$value => $$invalidate(3, $saveFolder = $$value));
     	validate_store(showSaveFolder, 'showSaveFolder');
-    	component_subscribe($$self, showSaveFolder, $$value => $$invalidate(5, $showSaveFolder = $$value));
+    	component_subscribe($$self, showSaveFolder, $$value => $$invalidate(4, $showSaveFolder = $$value));
     	validate_store(searchKeyword, 'searchKeyword');
-    	component_subscribe($$self, searchKeyword, $$value => $$invalidate(6, $searchKeyword = $$value));
+    	component_subscribe($$self, searchKeyword, $$value => $$invalidate(5, $searchKeyword = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
 
@@ -21960,6 +21965,7 @@ var app = (function () {
 
     	const onEnter = e => {
     		if (e.charCode === 13) {
+    			console.log("search entered with value=" + e.target.value);
     			search(e.target.value);
     		}
     	};
@@ -22027,7 +22033,7 @@ var app = (function () {
     		$searchKeyword
     	});
 
-    	return [routes, handleInput, onEnter, goSettings];
+    	return [routes, onEnter, goSettings];
     }
 
     class App extends SvelteComponentDev {

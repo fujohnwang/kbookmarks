@@ -21,4 +21,5 @@
     - since currently the search and open/close issues are still buggy with raw IndexedDB
     - No need anymore, we have fix bug on search with IndexedDB.
 - [X] generalize bookmark message passing with parentId + title + url
-
+- [X] finish export functionality
+- [X] fix bug on search more than once on result list (svelte onMount issue) 

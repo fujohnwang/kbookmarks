@@ -35,6 +35,7 @@
 
     const onEnter = e => {
         if (e.charCode === 13) {
+            console.log("search entered with value=" + e.target.value);
             search(e.target.value);
         }
     }
@@ -78,8 +79,8 @@
             </div>
             <div class="form-control w-full flex-auto ml-4 -mr-2">
                 <input type="text" placeholder="Search..." class="input input-bordered"
-                       on:input={handleInput}
                        on:keypress={onEnter}>
+                <!--                on:input={handleInput}-->
             </div>
         </div>
         <div class="lg:w-1/2 md:w-2/3 mx-auto">
