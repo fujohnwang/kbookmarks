@@ -259,6 +259,29 @@ chrome.runtime.onMessage.addListener(
             })
             return true;
         }
+
+        if (request.typ === "export") {
+            console.log("export request receives...")
+            doWith(function (store) {
+                console.log("get all records...")
+                let req = store.getAll();
+                req.onsuccess = () => {
+                    console.log("send back all of the results...")
+                    sendResponse({
+                        status: 'OK',
+                        value: req.result
+                    })
+                }
+                req.onerror = () => {
+                    sendResponse({
+                        status: 'ERR',
+                        value: ''
+                    })
+                }
+            });
+            return true;
+        }
+
         return true;  // indicate for async process in background to continue
     }
 );

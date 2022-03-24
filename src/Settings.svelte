@@ -34,8 +34,37 @@
             ]
         });
         const writable = await fileHandle.createWritable();
-        await writable.write("{'content': 'iterate bookmark tree to generate content'}");
-        await writable.close();
+        console.log("request all bookmarks from bg worker...")
+        chrome.runtime.sendMessage({
+            typ: "export"
+        }).then(response => {
+            console.log("receives load response: %o", response)
+            if (response.status === 'OK') {
+                writable.write(JSON.stringify(response.value)).then(() => {
+                    console.log('close writable handle when write is done.');
+                    writable.close()
+                    chrome.notifications.create('kBookmarkNotification', {
+                        title: "Success",
+                        message: "kBookmarks Export Successfully.",
+                        iconUrl: "icon.jpg",
+                        type: 'basic',
+                        priority: 2
+                    }, function (id) {
+                        // callback if necessary
+                    })
+                })
+            } else {
+                chrome.notifications.create('kBookmarkNotification', {
+                    title: "FAILED!",
+                    message: "something goes wrong when exporting bookmarks, retry or contact the developer.",
+                    iconUrl: "icon.jpg",
+                    type: 'basic',
+                    priority: 2
+                }, function (id) {
+                    // callback if necessary
+                })
+            }
+        })
     }
 
     onMount(async () => {
