@@ -209,7 +209,7 @@ chrome.runtime.onMessage.addListener(
                     store.index("titleIdx").openCursor().onsuccess = function (e) {
                         let cursor = e.target.result;
                         if (cursor) {
-                            if (cursor.value.title.includes(keyword)) {
+                            if (cursor.value.title.toLowerCase().includes(keyword.toLowerCase())) {
                                 console.log(`found keyword: ${keyword} in title index, add it to result list...`)
                                 bookmarks.push({
                                     id: cursor.value.id,
@@ -230,7 +230,7 @@ chrome.runtime.onMessage.addListener(
                     store.index("commentIdx").openCursor().onsuccess = function (e) {
                         let cursor = e.target.result;
                         if (cursor) {
-                            if (cursor.value.comment.includes(keyword)) {
+                            if (cursor.value.comment.toLowerCase().includes(keyword.toLowerCase())) {
                                 console.log(`found keyword: ${keyword} in comment index, add it to result list...`)
                                 bookmarks.push({
                                     id: cursor.value.id,
