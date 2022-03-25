@@ -79,6 +79,7 @@
             </div>
             <div class="form-control w-full flex-auto ml-4 -mr-2">
                 <input type="text" placeholder="Search..." class="input input-bordered"
+                       on:input={handleInput}
                        on:keypress={onEnter}>
                 <!--                on:input={handleInput}-->
             </div>
