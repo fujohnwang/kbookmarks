@@ -2,6 +2,8 @@
 
 # Intro to kBookmarks
 
+**mark and recall bookmarks at will**
+
 kBookmarks is a Chrome bookmark extension from [KEEVOL](https://keevol.com)
 
 The critical philosophy of this extension is "**For long-tail less-used bookmarks, we can tag them and comment them at save and recall them later on by searching with tags or comment we have left before**".
