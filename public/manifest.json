@@ -1,14 +1,13 @@
 {
   "name": "kBookmarks",
   "manifest_version": 3,
-  "version": "0.1",
+  "version": "0.1.1",
   "author": "fujohnwang",
   "description": "bookmark manager chrome extension from keevol",
   "permissions": [
     "storage",
     "unlimitedStorage",
     "activeTab",
-    "tabs",
     "bookmarks",
     "notifications"
   ],

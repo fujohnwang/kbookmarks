@@ -26,6 +26,12 @@ if you are interested in [the evolution path](docs/evolution_path.md)
 
 # How to install
 
+go to [Chrome web store](https://chrome.google.com/webstore/detail/kbookmarks/kbbmclcpemnmajbpdachdbogddcigglp) and [Add to Chrome].
+
+# How to install manually 
+
+If you would love to: 
+
 <https://github.com/fujohnwang/kbookmark/wiki#how-to-install>
 
 # How to build by yourself?
