@@ -2,6 +2,9 @@
 
 # Intro to kBookmarks
 
+[![MadeWithSvelte.com shield](https://madewithsvelte.com/storage/repo-shields/3902-shield.svg)](https://madewithsvelte.com/p/kbookmarks/shield-link)
+
+
 **mark and recall bookmarks at will**
 
 kBookmarks is a Chrome bookmark extension from [KEEVOL](https://keevol.com)
