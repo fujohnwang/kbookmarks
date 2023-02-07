@@ -48,6 +48,14 @@ If you would love to:
 5. You can enjoy this extension now.
 
 
+# Buy Me A Coffee
+
+<https://ko-fi.com/fubao>
+
+# LICENSE
+
+MIT
+
 
 # Ref
 

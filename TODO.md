@@ -25,3 +25,11 @@
 - [X] fix bug on search more than once on result list (svelte onMount issue)
 - [X] import all existing chrome bookmarks at install
 - [ ] import function paired with export
+- [ ] kbkmk加后台索引与统计功能？
+  - 手动输入网址，一周内统计排名或者直接就是一周统计排名
+  - ext能监听用户访问的行为吗？
+    - https://stackoverflow.com/questions/36243128/tracking-user-activity-with-chrome-extension
+      - Try Content Scripts. Include the script in every page by using * in the manifest, and then use the content script to send the tab url (window.location or something) to the background page.
+
+
+

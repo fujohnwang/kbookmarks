@@ -18,5 +18,13 @@
   "action": {
     "default_icon": "icon.jpg",
     "default_popup": "index.html"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "MacCtrl+Shift+K"
+      }
+    }
   }
 }
