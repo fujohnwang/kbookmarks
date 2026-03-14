@@ -44,13 +44,20 @@ chrome.runtime.onInstalled.addListener(async (e) => {
             store.createIndex('commentIdx', 'comment', {
                 unique: false
             });
-
-            // 3. import and index existing bookmarks of chrome if necessary
+        }
+    };
+    request.onsuccess = (event) => {
+        let db = event.target.result;
+        // import existing bookmarks only when db was just created (version changed)
+        if (event.oldVersion === 0) {
             chrome.bookmarks.getTree(function (results) {
-                // console.log('dump tree: %o', results)
-                importAllExistingBookmarks(results, store)
-            })
-
+                const txn = db.transaction(kBookmarkIdbStoreName, 'readwrite');
+                const store = txn.objectStore(kBookmarkIdbStoreName);
+                importAllExistingBookmarks(results, store);
+                txn.oncomplete = () => db.close();
+            });
+        } else {
+            db.close();
         }
     };
 })
@@ -60,7 +67,7 @@ function importAllExistingBookmarks(nodes, store) {
     if (itemExists(nodes)) {
         nodes.forEach(n => {
             if (n.children) {
-                importAllExistingBookmarks(n.children, null)
+                importAllExistingBookmarks(n.children, store)
             } else {
                 addBookmark({
                     ...n,
@@ -288,6 +295,49 @@ chrome.runtime.onMessage.addListener(
                     })
                 })
             })
+            return true;
+        }
+
+        if (request.typ === "count") {
+            doWith(function (store) {
+                let req = store.count();
+                req.onsuccess = () => {
+                    sendResponse({count: req.result});
+                };
+                req.onerror = () => {
+                    sendResponse({count: 0});
+                };
+            });
+            return true;
+        }
+
+        if (request.typ === "import") {
+            console.log("import request receives...")
+            let bookmarks = request.bookmarks;
+            let folderName = `kBookmarks-${new Date().toISOString().slice(0, 10)}`;
+            chrome.bookmarks.create({title: folderName}, function (folder) {
+                console.log("created import folder: %o", folder);
+                let imported = 0;
+                let pending = bookmarks.length;
+                bookmarks.forEach(b => {
+                    chrome.bookmarks.create({
+                        parentId: folder.id,
+                        title: b.title,
+                        url: b.url
+                    }, function (created) {
+                        let meta = {
+                            ...created,
+                            comment: b.comment || ''
+                        };
+                        appendMeta(meta);
+                        imported++;
+                        pending--;
+                        if (pending === 0) {
+                            sendResponse({status: 'OK', count: imported});
+                        }
+                    });
+                });
+            });
             return true;
         }
 

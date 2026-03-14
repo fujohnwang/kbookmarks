@@ -10,7 +10,7 @@
     import ResultList from "./ResultList.svelte";
     import FolderSelection from "./FolderSelection.svelte";
 
-    import {searchKeyword, showSaveFolderStorageKey, saveFolderStorageKey, showSaveFolder, saveFolder} from './repo.js';
+    import {searchKeyword, showSaveFolderStorageKey, saveFolderStorageKey, showSaveFolder, saveFolder, bookmarkCount, refreshBookmarkCount} from './repo.js';
 
     const routes = {
         '/': Default,
@@ -65,6 +65,9 @@
                 $saveFolder = value;
             }
         })
+
+        // load bookmark count
+        refreshBookmarkCount();
 
 
     })
@@ -130,9 +133,11 @@
                 </div>
             </div>
             <div class="item">
+                <span class="text-xs text-accent opacity-60">{$bookmarkCount} bookmarks</span>
+            </div>
+            <div class="item">
                 <div class="tooltip tooltip-right" data-tip="change theme">
                     <label for="theme-select">
-                        <!--                        <span class="bg-transparent text-secondary">Change Theme</span>-->
                         <select id="theme-select" data-choose-theme class="select text-accent">
                             <option value="Business">DEFAULT</option>
                             <option value="dark">DARK</option>
