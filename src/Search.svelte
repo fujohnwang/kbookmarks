@@ -43,22 +43,24 @@
     })
 </script>
 
-<div class="flex flex-wrap -m-2">
-    <div class="text-sm breadcrumbs p-2 my-2">
-        <ul>
-            <li><a use:link href="/">kBookmarks</a></li>
-            <li>Search</li>
-        </ul>
+<div class="flex flex-col -m-2">
+    <div class="sticky top-0 bg-base-100 z-10">
+        <div class="text-sm breadcrumbs p-2 my-2">
+            <ul>
+                <li><a use:link href="/">kBookmarks</a></li>
+                <li>Search</li>
+            </ul>
+        </div>
+
+        <div class="p-2 w-full">
+            <input bind:this={searchInput} type="text" placeholder="Search bookmarks..."
+                   class="input input-bordered w-full"
+                   value={$searchKeyword}
+                   on:input={handleInput}>
+        </div>
     </div>
 
-    <div class="p-2 w-full">
-        <input bind:this={searchInput} type="text" placeholder="Search bookmarks..."
-               class="input input-bordered w-full"
-               value={$searchKeyword}
-               on:input={handleInput}>
-    </div>
-
-    <div class="p-2 w-full space-y-1">
+    <div class="p-2 w-full space-y-1 overflow-y-auto">
         {#if bookmarks && bookmarks.length}
             {#each bookmarks as bk}
                 <div class="card w-full bg-base-100">
