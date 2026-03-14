@@ -47,4 +47,5 @@ mvnw*
 
 /scripts
 *.zip
-public
+public/
+dist/
