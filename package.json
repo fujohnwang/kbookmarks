@@ -1,11 +1,12 @@
 {
   "name": "svelte-app",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "private": true,
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public --no-clear"
+    "start": "sirv public --no-clear",
+    "publish": "VERSION=$(node -p \"require('./package.json').version\") && node -e \"const f='public/manifest.json';const m=JSON.parse(require('fs').readFileSync(f));m.version=process.argv[1];require('fs').writeFileSync(f,JSON.stringify(m,null,2))\" $VERSION && rollup -c && mkdir -p dist && cd public && zip -r ../dist/kbookmarks-${VERSION}.zip . && cd .."
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",

@@ -4,7 +4,7 @@
     import LeafFolderIcon from "./tree/LeafFolderIcon.svelte";
     import {onMount} from 'svelte';
 
-    import {showSaveFolder, saveFolder} from "./repo";
+    import {showSaveFolder, saveFolder, refreshBookmarkCount} from "./repo";
 
     $: disableDefaultSaveFolder = !$showSaveFolder;
 
@@ -14,10 +14,53 @@
     let exportDisabled = false;
 
     async function importBookmarks() {
-        const [fileHandle] = await window.showOpenFilePicker();
+        const [fileHandle] = await window.showOpenFilePicker({
+            types: [
+                {
+                    description: 'kBookmark Persistent Files',
+                    accept: {
+                        'application/json': ['.json'],
+                    },
+                },
+            ]
+        });
         const file = await fileHandle.getFile();
         const contents = await file.text();
-        console.log(contents)
+        const bookmarks = JSON.parse(contents);
+        if (!Array.isArray(bookmarks) || bookmarks.length === 0) {
+            chrome.notifications.create('kBookmarkNotification', {
+                title: "FAILED!",
+                message: "Invalid or empty bookmark file.",
+                iconUrl: "icon.jpg",
+                type: 'basic',
+                priority: 2
+            });
+            return;
+        }
+        chrome.runtime.sendMessage({
+            typ: "import",
+            bookmarks: bookmarks
+        }).then(response => {
+            console.log("import response: %o", response);
+            if (response.status === 'OK') {
+                refreshBookmarkCount();
+                chrome.notifications.create('kBookmarkNotification', {
+                    title: "Success",
+                    message: `Imported ${response.count} bookmarks successfully.`,
+                    iconUrl: "icon.jpg",
+                    type: 'basic',
+                    priority: 2
+                });
+            } else {
+                chrome.notifications.create('kBookmarkNotification', {
+                    title: "FAILED!",
+                    message: "Something went wrong when importing bookmarks, retry or contact the developer.",
+                    iconUrl: "icon.jpg",
+                    type: 'basic',
+                    priority: 2
+                });
+            }
+        });
     }
 
     async function exportBookmarks() {

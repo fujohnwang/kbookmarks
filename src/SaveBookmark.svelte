@@ -2,7 +2,7 @@
     import {onMount} from "svelte";
     import LeafFolderIcon from './tree/LeafFolderIcon.svelte';
     import {push, pop, replace} from 'svelte-spa-router';
-    import {showSaveFolder, saveFolder, getBookmarkIdByTitle} from "./repo";
+    import {showSaveFolder, saveFolder, getBookmarkIdByTitle, refreshBookmarkCount} from "./repo";
 
     let title = "";
     let url = "";
@@ -41,6 +41,7 @@
                 console.log(`send save request with payload: %o`, payload)
                 chrome.runtime.sendMessage(payload).then((v) => {
                     console.log("receives response when saved: %o", v)
+                    refreshBookmarkCount();
                     window.close();
                 });
             })

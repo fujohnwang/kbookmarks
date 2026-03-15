@@ -1,43 +1,27 @@
 <script>
     import {onMount} from 'svelte';
     import {themeChange} from 'theme-change'
-    import _ from 'lodash';
     import Router from 'svelte-spa-router';
     import {link} from 'svelte-spa-router';
     import {push, pop, replace} from 'svelte-spa-router';
     import Default from './SaveBookmark.svelte';
     import Settings from './Settings.svelte';
-    import ResultList from "./ResultList.svelte";
+    import Search from "./Search.svelte";
     import FolderSelection from "./FolderSelection.svelte";
 
-    import {searchKeyword, showSaveFolderStorageKey, saveFolderStorageKey, showSaveFolder, saveFolder} from './repo.js';
+    import {searchKeyword, showSaveFolderStorageKey, saveFolderStorageKey, showSaveFolder, saveFolder, bookmarkCount, refreshBookmarkCount} from './repo.js';
 
     const routes = {
         '/': Default,
         '/settings': Settings,
-        '/results': ResultList,
+        '/search': Search,
         '/folders': FolderSelection,
         '*': Default
     }
 
-    function search(keyword) {
-        if (keyword) {
-            $searchKeyword = keyword;
-            push('/results')
-        } else {
-            push('/')
-        }
-    }
-
-    const handleInput = _.debounce(e => {
-        search(e.target.value);
-    }, 300)
-
-    const onEnter = e => {
-        if (e.charCode === 13) {
-            console.log("search entered with value=" + e.target.value);
-            search(e.target.value);
-        }
+    function goSearch() {
+        $searchKeyword = '';
+        push('/search');
     }
 
     function goSettings() {
@@ -66,6 +50,9 @@
             }
         })
 
+        // load bookmark count
+        refreshBookmarkCount();
+
 
     })
 
@@ -77,11 +64,14 @@
             <div class="flex-1">
                 <h1 class="text-3xl font-extrabold text-primary"><a href="/" use:link>kBookmarks</a></h1>
             </div>
-            <div class="form-control w-full flex-auto ml-4 -mr-2">
-                <input type="text" placeholder="Search..." class="input input-bordered"
-                       on:input={handleInput}
-                       on:keypress={onEnter}>
-                <!--                on:input={handleInput}-->
+            <div class="flex-none">
+                <button class="btn btn-ghost btn-circle" on:click={goSearch}>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
             </div>
         </div>
         <div class="lg:w-1/2 md:w-2/3 mx-auto">
@@ -130,9 +120,11 @@
                 </div>
             </div>
             <div class="item">
+                <span class="text-xs text-accent opacity-60">{$bookmarkCount} bookmarks</span>
+            </div>
+            <div class="item">
                 <div class="tooltip tooltip-right" data-tip="change theme">
                     <label for="theme-select">
-                        <!--                        <span class="bg-transparent text-secondary">Change Theme</span>-->
                         <select id="theme-select" data-choose-theme class="select text-accent">
                             <option value="Business">DEFAULT</option>
                             <option value="dark">DARK</option>

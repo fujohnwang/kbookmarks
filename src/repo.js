@@ -32,6 +32,14 @@ export const selectedLiElement = writable(null);
 export const selectedLiElementNode = writable(null);
 export const selectedLiElementText = writable('');
 
+export const bookmarkCount = writable(0);
+
+export function refreshBookmarkCount() {
+    chrome.runtime.sendMessage({typ: "count"}).then(response => {
+        bookmarkCount.set(response.count || 0);
+    });
+}
+
 export function itemExists(results) {
     return results && Array.isArray(results) && results.length;
 }
