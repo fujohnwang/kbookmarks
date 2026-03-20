@@ -8,10 +8,13 @@
 
     $: disableDefaultSaveFolder = !$showSaveFolder;
 
-    // TODO sync with store or remote in the future
-    let syncDisabled = true;
-    let importDisabled = false;
-    let exportDisabled = false;
+    let loading = false;
+    let showSuccess = false;
+
+    function flashSuccess() {
+        showSuccess = true;
+        setTimeout(() => showSuccess = false, 2000);
+    }
 
     async function importBookmarks() {
         const [fileHandle] = await window.showOpenFilePicker({
@@ -37,16 +40,19 @@
             });
             return;
         }
+        loading = true;
         chrome.runtime.sendMessage({
             typ: "import",
             bookmarks: bookmarks
         }).then(response => {
+            loading = false;
             console.log("import response: %o", response);
             if (response.status === 'OK') {
+                flashSuccess();
                 refreshBookmarkCount();
                 chrome.notifications.create('kBookmarkNotification', {
                     title: "Success",
-                    message: `Imported ${response.count} bookmarks successfully.`,
+                    message: `Import done: ${response.added} added, ${response.updated} updated.`,
                     iconUrl: "icon.jpg",
                     type: 'basic',
                     priority: 2
@@ -78,6 +84,7 @@
         });
         const writable = await fileHandle.createWritable();
         console.log("request all bookmarks from bg worker...")
+        loading = true;
         chrome.runtime.sendMessage({
             typ: "export"
         }).then(response => {
@@ -86,6 +93,8 @@
                 writable.write(JSON.stringify(response.value)).then(() => {
                     console.log('close writable handle when write is done.');
                     writable.close()
+                    loading = false;
+                    flashSuccess();
                     chrome.notifications.create('kBookmarkNotification', {
                         title: "Success",
                         message: "kBookmarks Export Successfully.",
@@ -97,6 +106,7 @@
                     })
                 })
             } else {
+                loading = false;
                 chrome.notifications.create('kBookmarkNotification', {
                     title: "FAILED!",
                     message: "something goes wrong when exporting bookmarks, retry or contact the developer.",
@@ -125,27 +135,25 @@
         </ul>
     </div>
 
-    <div class="flex justify-between items-center p-2 space-x-2 w-full mb-6">
-        <div class="flex-none">
-            <button class="btn btn-sm btn-outline" disabled={syncDisabled}>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z"/>
-                    <path d="M9 13h2v5a1 1 0 11-2 0v-5z"/>
-                </svg>
-                Sync
-            </button>
-
-        </div>
-        <div class="flex-grow">
-
-        </div>
-        <div class="flex-none">
-            <button class="btn btn-sm  btn-outline" data-tip="not done yet" disabled={importDisabled}
+    <div class="flex items-center p-2 space-x-2 w-full mb-6" class:cursor-wait={loading}>
+        <div class="flex-none flex items-center space-x-2">
+            <button class="btn btn-sm btn-outline" disabled={loading}
                     on:click={importBookmarks}>Import
             </button>
-            <button class="btn btn-sm  btn-outline" data-tip="not done yet" disabled={exportDisabled}
+            <button class="btn btn-sm btn-outline" disabled={loading}
                     on:click={exportBookmarks}>Export
             </button>
+            {#if loading}
+                <svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            {:else if showSuccess}
+                <svg class="h-5 w-5 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 13l4 4L19 7" class="check-draw"/>
+                </svg>
+            {/if}
         </div>
     </div>
 
@@ -199,3 +207,16 @@
         </div>
     </div>
 </div>
+
+<style>
+    .check-draw {
+        stroke-dasharray: 24;
+        stroke-dashoffset: 24;
+        animation: draw 0.4s ease forwards;
+    }
+    @keyframes draw {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+</style>

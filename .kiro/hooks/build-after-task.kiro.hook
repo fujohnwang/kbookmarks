@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "任务完成后构建验证",
+  "description": "在 spec 任务完成后自动执行 npm run build，验证编译是否成功",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "npm run build"
+  }
+}
