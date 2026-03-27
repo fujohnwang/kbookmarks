@@ -314,29 +314,87 @@ chrome.runtime.onMessage.addListener(
         if (request.typ === "import") {
             console.log("import request receives...")
             let bookmarks = request.bookmarks;
-            let folderName = `kBookmarks-${new Date().toISOString().slice(0, 10)}`;
-            chrome.bookmarks.create({title: folderName}, function (folder) {
-                console.log("created import folder: %o", folder);
-                let imported = 0;
-                let pending = bookmarks.length;
-                bookmarks.forEach(b => {
+            let added = 0;
+            let updated = 0;
+            let pending = bookmarks.length;
+
+            if (pending === 0) {
+                sendResponse({status: 'OK', added: 0, updated: 0});
+                return true;
+            }
+
+            // find kBookmarks folder
+            chrome.bookmarks.search({title: kBookmarkFolderName}, function (folders) {
+                let folderId = itemExists(folders) ? folders[0].id : null;
+
+                function onComplete() {
+                    pending--;
+                    if (pending === 0) {
+                        sendResponse({status: 'OK', added: added, updated: updated});
+                    }
+                }
+
+                function createNewBookmark(b, parentId) {
                     chrome.bookmarks.create({
-                        parentId: folder.id,
+                        parentId: parentId,
                         title: b.title,
                         url: b.url
                     }, function (created) {
-                        let meta = {
-                            ...created,
-                            comment: b.comment || ''
-                        };
-                        appendMeta(meta);
-                        imported++;
-                        pending--;
-                        if (pending === 0) {
-                            sendResponse({status: 'OK', count: imported});
+                        appendMeta({...created, comment: b.comment || ''});
+                        added++;
+                        onComplete();
+                    });
+                }
+
+                function processBookmark(b, parentId) {
+                    chrome.bookmarks.search({url: b.url}, function (existing) {
+                        if (itemExists(existing)) {
+                            let local = existing[0];
+                            // update title if imported is newer
+                            let needTitleUpdate = b.dateAdded && local.dateAdded && b.dateAdded > local.dateAdded;
+                            if (needTitleUpdate) {
+                                chrome.bookmarks.update(local.id, {title: b.title});
+                            }
+                            // merge comment in IndexedDB
+                            doWith(function (store) {
+                                let query = store.get(local.id);
+                                query.onsuccess = function (event) {
+                                    let meta = event.target.result;
+                                    let localComment = (meta && meta.comment) || '';
+                                    let importComment = b.comment || '';
+                                    let newTitle = needTitleUpdate ? b.title : local.title;
+                                    let newComment = localComment;
+                                    if (importComment && importComment !== localComment) {
+                                        newComment = localComment ? localComment + '\n' + importComment : importComment;
+                                    }
+                                    let updatedMeta = {
+                                        ...(meta || local),
+                                        title: newTitle,
+                                        comment: newComment
+                                    };
+                                    store.put(updatedMeta);
+                                    updated++;
+                                    onComplete();
+                                };
+                                query.onerror = function () {
+                                    onComplete();
+                                };
+                            });
+                        } else {
+                            if (parentId) {
+                                createNewBookmark(b, parentId);
+                            } else {
+                                // create kBookmarks folder if not found
+                                chrome.bookmarks.create({title: kBookmarkFolderName}, function (folder) {
+                                    folderId = folder.id;
+                                    createNewBookmark(b, folder.id);
+                                });
+                            }
                         }
                     });
-                });
+                }
+
+                bookmarks.forEach(b => processBookmark(b, folderId));
             });
             return true;
         }
