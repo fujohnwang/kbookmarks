@@ -2,6 +2,150 @@ const kBookmarkFolderName = "kBookmarks"
 const kBookmarkIndexedDBName = "kbookmarksIdb"
 const kBookmarkIdbStoreName = "kbookmarksMetaStore"
 
+// --- Sync ---
+function syncPush(bookmark) {
+    chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token'], function (cfg) {
+        if (!cfg['sync.enabled'] || !cfg['sync.endpoint'] || !cfg['sync.token']) return;
+        let url = cfg['sync.endpoint'].replace(/\/$/, '') + '/push';
+        fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                token: cfg['sync.token'],
+                bookmarks: [{
+                    url: bookmark.url,
+                    title: bookmark.title,
+                    comment: bookmark.comment || '',
+                    date_added: bookmark.dateAdded
+                }]
+            })
+        }).then(r => console.log("sync push result:", r.status))
+          .catch(e => console.error("sync push failed:", e));
+    });
+}
+
+function syncPull() {
+    chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token', 'sync.last_sync'], function (cfg) {
+        if (!cfg['sync.enabled'] || !cfg['sync.endpoint'] || !cfg['sync.token']) return;
+        let since = cfg['sync.last_sync'] || 0;
+        let url = cfg['sync.endpoint'].replace(/\/$/, '') + '/pull';
+        fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({token: cfg['sync.token'], since: since})
+        }).then(r => r.json()).then(data => {
+            if (data.bookmarks && data.bookmarks.length) {
+                console.log("sync pull: received %d bookmarks", data.bookmarks.length);
+                processSyncPull(data.bookmarks);
+            }
+            if (data.server_time) {
+                chrome.storage.local.set({'sync.last_sync': data.server_time});
+            }
+        }).catch(e => console.error("sync pull failed:", e));
+    });
+}
+
+function processSyncPull(bookmarks) {
+    chrome.bookmarks.search({title: kBookmarkFolderName}, function (folders) {
+        let folderId = itemExists(folders) ? folders[0].id : null;
+        bookmarks.forEach(b => {
+            chrome.bookmarks.search({url: b.url}, function (existing) {
+                if (itemExists(existing)) {
+                    let local = existing[0];
+                    if (b.date_added && local.dateAdded && b.date_added > local.dateAdded) {
+                        chrome.bookmarks.update(local.id, {title: b.title});
+                    }
+                    doWith(function (store) {
+                        let query = store.get(local.id);
+                        query.onsuccess = function (event) {
+                            let meta = event.target.result;
+                            let localComment = (meta && meta.comment) || '';
+                            let importComment = b.comment || '';
+                            let newComment = localComment;
+                            if (importComment && importComment !== localComment) {
+                                newComment = localComment ? localComment + '\n' + importComment : importComment;
+                            }
+                            store.put({
+                                ...(meta || local),
+                                title: (b.date_added && local.dateAdded && b.date_added > local.dateAdded) ? b.title : local.title,
+                                comment: newComment
+                            });
+                        };
+                    });
+                } else {
+                    let parentId = folderId;
+                    if (!parentId) {
+                        chrome.bookmarks.create({title: kBookmarkFolderName}, function (folder) {
+                            folderId = folder.id;
+                            createAndStorePullBookmark(b, folder.id);
+                        });
+                    } else {
+                        createAndStorePullBookmark(b, parentId);
+                    }
+                }
+            });
+        });
+    });
+}
+
+function createAndStorePullBookmark(b, parentId) {
+    chrome.bookmarks.create({parentId: parentId, title: b.title, url: b.url}, function (created) {
+        appendMeta({...created, comment: b.comment || ''});
+    });
+}
+
+function syncPushAll(endpoint, token) {
+    doWith(function (store) {
+        let req = store.getAll();
+        req.onsuccess = () => {
+            let all = req.result;
+            if (!all || !all.length) return;
+            console.log("sync push all: %d bookmarks", all.length);
+            let url = endpoint.replace(/\/$/, '') + '/push';
+            // 分批推送，每批 100 条
+            let batchSize = 100;
+            for (let i = 0; i < all.length; i += batchSize) {
+                let batch = all.slice(i, i + batchSize).map(b => ({
+                    url: b.url,
+                    title: b.title,
+                    comment: b.comment || '',
+                    date_added: b.dateAdded
+                }));
+                fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({token: token, bookmarks: batch})
+                }).then(r => console.log("sync push batch result:", r.status))
+                  .catch(e => console.error("sync push batch failed:", e));
+            }
+        };
+    });
+}
+
+// Setup sync alarm
+chrome.alarms.onAlarm.addListener(function (alarm) {
+    if (alarm.name === 'kbookmark-sync-pull') {
+        syncPull();
+    }
+});
+
+function setupSyncAlarm(enabled) {
+    if (enabled) {
+        chrome.alarms.create('kbookmark-sync-pull', {periodInMinutes: 5});
+        console.log("sync alarm created (every 5 min)");
+    } else {
+        chrome.alarms.clear('kbookmark-sync-pull');
+        console.log("sync alarm cleared");
+    }
+}
+
+// Restore sync alarm on service worker startup
+chrome.storage.local.get(['sync.enabled'], function (cfg) {
+    if (cfg['sync.enabled']) {
+        setupSyncAlarm(true);
+    }
+});
+
 function itemExists(results) {
     return results && Array.isArray(results) && results.length;
 }
@@ -140,6 +284,21 @@ chrome.runtime.onMessage.addListener(
         let url = request.url;
         let parentFolderId = request.parentFolderId;
 
+        if (request.typ === "sync-config") {
+            setupSyncAlarm(request.enabled);
+            if (request.enabled) {
+                // 首次同步：全量 push 本地数据到服务端，然后 pull
+                chrome.storage.local.get(['sync.last_sync'], function (cfg) {
+                    if (!cfg['sync.last_sync']) {
+                        syncPushAll(request.endpoint, request.token);
+                    }
+                    syncPull();
+                });
+            }
+            sendResponse({status: 'ok'});
+            return true;
+        }
+
         if (request.typ === "save") {
             bookmarkExists(title, url, (items) => {
                 if (itemExists(items)) {
@@ -201,6 +360,8 @@ chrome.runtime.onMessage.addListener(
                     })
                 }
                 sendResponse({message: "done!"});
+                // push to sync server if enabled
+                syncPush({url: url, title: title, comment: comment, dateAdded: Date.now()});
             });
 
             return true;

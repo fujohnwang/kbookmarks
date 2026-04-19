@@ -11,9 +11,74 @@
     let loading = false;
     let showSuccess = false;
 
+    let syncEnabled = false;
+    let syncEndpoint = '';
+    let syncToken = '';
+    let syncSaving = false;
+    let syncTesting = false;
+    let syncTestResult = ''; // 'ok' | 'fail' | ''
+
     function flashSuccess() {
         showSuccess = true;
         setTimeout(() => showSuccess = false, 2000);
+    }
+
+    function loadSyncConfig() {
+        chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token'], function (result) {
+            syncEnabled = result['sync.enabled'] || false;
+            syncEndpoint = result['sync.endpoint'] || '';
+            syncToken = result['sync.token'] || '';
+        });
+    }
+
+    function saveSyncConfig() {
+        syncSaving = true;
+        chrome.storage.local.set({
+            'sync.enabled': syncEnabled,
+            'sync.endpoint': syncEndpoint,
+            'sync.token': syncToken
+        }, function () {
+            console.log('sync config saved');
+            // 通知 background 开启/关闭同步
+            chrome.runtime.sendMessage({
+                typ: 'sync-config',
+                enabled: syncEnabled,
+                endpoint: syncEndpoint,
+                token: syncToken
+            }).then(() => {
+                syncSaving = false;
+                flashSuccess();
+            }).catch(() => {
+                syncSaving = false;
+            });
+        });
+    }
+
+    async function testSyncConnection() {
+        if (!syncEndpoint || !syncToken) return;
+        syncTesting = true;
+        syncTestResult = '';
+        try {
+            let url = syncEndpoint.replace(/\/$/, '') + '/ping';
+            let resp = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({token: syncToken})
+            });
+            syncTestResult = resp.ok ? 'ok' : 'fail';
+        } catch (e) {
+            console.error('sync test failed:', e);
+            syncTestResult = 'fail';
+        }
+        syncTesting = false;
+        setTimeout(() => syncTestResult = '', 3000);
+    }
+
+    function onSyncToggle() {
+        if (!syncEnabled) {
+            // 关闭同步时直接保存
+            saveSyncConfig();
+        }
     }
 
     async function importBookmarks() {
@@ -121,7 +186,7 @@
     }
 
     onMount(async () => {
-
+        loadSyncConfig();
     })
 
 </script>
@@ -192,6 +257,59 @@
                        value={$saveFolder} readonly/>
             </label>
         </div>
+    </div>
+
+    <div class="divider p-2 w-full"></div>
+
+    <div class="p-2 w-full">
+        <div class="form-control">
+            <label class="label cursor-pointer justify-start space-x-2">
+                <span class="label-text">Sync</span>
+                <input type="checkbox" class="toggle toggle-sm" bind:checked={syncEnabled}
+                       on:change={onSyncToggle}/>
+            </label>
+        </div>
+        {#if syncEnabled}
+            <div class="space-y-2 mt-2">
+                <div class="form-control w-full">
+                    <label class="label" for="syncEndpoint">
+                        <span class="label-text text-xs">Server URL</span>
+                    </label>
+                    <input id="syncEndpoint" type="text" placeholder="https://your-server.com/api"
+                           class="input input-bordered input-sm w-full"
+                           bind:value={syncEndpoint}/>
+                </div>
+                <div class="form-control w-full">
+                    <label class="label" for="syncToken">
+                        <span class="label-text text-xs">Token</span>
+                    </label>
+                    <input id="syncToken" type="password" placeholder="your sync token"
+                           class="input input-bordered input-sm w-full"
+                           bind:value={syncToken}/>
+                </div>
+                <div class="flex items-center space-x-2 mt-2">
+                    <button class="btn btn-sm btn-outline" disabled={syncSaving || !syncEndpoint || !syncToken}
+                            on:click={saveSyncConfig}>
+                        {#if syncSaving}Saving...{:else}Save{/if}
+                    </button>
+                    <button class="btn btn-sm btn-outline" disabled={syncTesting || !syncEndpoint || !syncToken}
+                            on:click={testSyncConnection}>
+                        {#if syncTesting}Testing...{:else}Test Connection{/if}
+                    </button>
+                    {#if syncTestResult === 'ok'}
+                        <svg class="h-5 w-5 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 13l4 4L19 7" class="check-draw"/>
+                        </svg>
+                    {:else if syncTestResult === 'fail'}
+                        <svg class="h-5 w-5 text-error" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    {/if}
+                </div>
+            </div>
+        {/if}
     </div>
 
     <div class="flex justify-between items-center p-2 mx-2 space-x-2 w-full">
