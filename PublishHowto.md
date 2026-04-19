@@ -3,6 +3,8 @@
 ./publish.sh <Version>
 ```
 
+然后去 [https://developers.google.com/profile/u/110281939575116227303/dashboard](https://developers.google.com/profile/u/110281939575116227303/dashboard) 上传发布。
+
 
 ---
 
