@@ -1,7 +1,7 @@
 {
   "name": "kBookmarks",
   "manifest_version": 3,
-  "version": "1.1.2",
+  "version": "1.2.0",
   "author": "fujohnwang",
   "description": "bookmark manager chrome extension from keevol",
   "permissions": [
