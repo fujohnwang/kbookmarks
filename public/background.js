@@ -28,8 +28,10 @@ chrome.runtime.onInstalled.addListener(async (e) => {
     request.onerror = (event) => {
         console.error("Database error at open: %o", event.target);
     };
+    let isNewDb = false;
     request.onupgradeneeded = (event) => {
         let db = event.target.result;
+        isNewDb = true;
 
         if (!db.objectStoreNames.contains(kBookmarkIdbStoreName)) {
             console.log(`create object store: ${kBookmarkIdbStoreName} with auto-increment id...`)
@@ -48,8 +50,7 @@ chrome.runtime.onInstalled.addListener(async (e) => {
     };
     request.onsuccess = (event) => {
         let db = event.target.result;
-        // import existing bookmarks only when db was just created (version changed)
-        if (event.oldVersion === 0) {
+        if (isNewDb) {
             chrome.bookmarks.getTree(function (results) {
                 const txn = db.transaction(kBookmarkIdbStoreName, 'readwrite');
                 const store = txn.objectStore(kBookmarkIdbStoreName);
