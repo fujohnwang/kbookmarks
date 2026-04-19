@@ -18,4 +18,4 @@ git tag "v$VERSION"
 
 echo "完成！版本 $VERSION 已发布并打 tag v$VERSION"
 
-echo "可以去 https://developers.google.com/profile/u/110281939575116227303/dashboard 上传dist文件夹下的制品并正式发布了"
+echo "可以去 https://chrome.google.com/webstore/devconsole/d12b7608-f2cb-463b-9fa2-76b3ee0bc159 上传dist文件夹下的制品并正式发布了"
