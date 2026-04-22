@@ -12,7 +12,7 @@
 
 ![](./images/upload_package_howto.jpg)
 
-Chrome web store跟play store和app store的更新操作有点儿不一样，直接upload new package就完了，不用写啥What's new或者submit review啥的😂
+~~Chrome web store跟play store和app store的更新操作有点儿不一样，直接upload new package就完了，不用写啥What's new或者submit review啥的😂~~  ( 需要submit，我是忽略了更新条件说明，所以submit按钮是disable状态，导致误以为不需要submit 😂)
 
 ![](./images/extension-list-page.jpg)
 
