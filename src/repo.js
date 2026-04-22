@@ -37,6 +37,13 @@ export const bookmarkCount = writable(0);
 export function refreshBookmarkCount() {
     chrome.runtime.sendMessage({typ: "count"}).then(response => {
         bookmarkCount.set(response.count || 0);
+    }).catch(() => {
+        // service worker 可能未就绪，延迟重试一次
+        setTimeout(() => {
+            chrome.runtime.sendMessage({typ: "count"}).then(response => {
+                bookmarkCount.set(response.count || 0);
+            }).catch(() => {});
+        }, 1000);
     });
 }
 
