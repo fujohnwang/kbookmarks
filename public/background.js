@@ -15,6 +15,14 @@ function clearSyncStatus() {
     chrome.storage.local.set({'sync.status': null});
 }
 
+function clearSyncStatusIf(prefix) {
+    chrome.storage.local.get('sync.status', function (cfg) {
+        if (cfg['sync.status'] && cfg['sync.status'].startsWith(prefix)) {
+            chrome.storage.local.set({'sync.status': null});
+        }
+    });
+}
+
 // --- Sync ---
 function syncPush(bookmark) {
     chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token'], function (cfg) {
@@ -32,18 +40,26 @@ function syncPush(bookmark) {
                     date_added: bookmark.dateAdded
                 }]
             })
-        }).then(r => console.log("[%s] sync push result: %s", ts(), r.status))
-          .catch(e => console.error("[%s] sync push failed: %o", ts(), e));
+        }).then(r => {
+            if (r.ok) {
+                console.log("[%s] sync push: %s", ts(), bookmark.url);
+            } else {
+                console.error("[%s] sync push failed: %s - %s", ts(), r.status, bookmark.url);
+            }
+          }).catch(e => console.error("[%s] sync push error: %o", ts(), e));
     });
 }
 
 function syncPull() {
-    setSyncStatus('pulling');
-    chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token', 'sync.last_sync'], function (cfg) {
-        if (!cfg['sync.enabled'] || !cfg['sync.endpoint'] || !cfg['sync.token']) {
-            clearSyncStatus();
+    chrome.storage.local.get(['sync.status', 'sync.enabled', 'sync.endpoint', 'sync.token', 'sync.last_sync'], function (cfg) {
+        // 如果正在全量推送，跳过 pull 避免干扰
+        if (cfg['sync.status'] && cfg['sync.status'].startsWith('pushing')) {
             return;
         }
+        if (!cfg['sync.enabled'] || !cfg['sync.endpoint'] || !cfg['sync.token']) {
+            return;
+        }
+        setSyncStatus('pulling');
         let since = cfg['sync.last_sync'] || 0;
         let url = cfg['sync.endpoint'].replace(/\/$/, '') + '/pull';
         fetch(url, {
@@ -61,7 +77,7 @@ function syncPull() {
                 chrome.storage.local.set({'sync.last_sync': data.server_time});
             }
         }).catch(e => console.error("[%s] sync pull failed: %o", ts(), e))
-          .finally(() => clearSyncStatus());
+          .finally(() => clearSyncStatusIf('pulling'));
     });
 }
 
@@ -147,6 +163,7 @@ async function syncPushAll(endpoint, token) {
                 });
                 if (r.ok) {
                     ok = true;
+                    console.log("[%s] sync push batch[%d] ok (%d bookmarks)", ts(), i / batchSize, batch.length);
                     break;
                 }
                 console.error("[%s] sync push batch[%d] failed with status: %s (retry %d)", ts(), i / batchSize, r.status, retry);
@@ -173,7 +190,7 @@ async function syncPushAll(endpoint, token) {
     if (totalFailed > 0) {
         setSyncStatus('push_incomplete:' + totalSucceeded + '/' + (totalSucceeded + totalFailed));
     } else {
-        clearSyncStatus();
+        clearSyncStatusIf('pushing:');
     }
 }
 
@@ -203,6 +220,8 @@ function syncPushBatch(bookmarks) {
                     });
                     if (!r.ok) {
                         console.error("[%s] sync push batch failed: %s", ts(), r.status);
+                    } else {
+                        console.log("[%s] sync push batch ok (%d bookmarks)", ts(), items.length);
                     }
                 } catch (e) {
                     console.error("[%s] sync push batch error: %o", ts(), e);
