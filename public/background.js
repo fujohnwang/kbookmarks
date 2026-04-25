@@ -142,45 +142,64 @@ async function syncPushAll(endpoint, token) {
     let total = all.length;
     console.log("[%s] sync push all: %d bookmarks", ts(), total);
     let url = endpoint.replace(/\/$/, '') + '/push';
+
+    // 构建待发送列表
+    let items = all.map(b => ({
+        url: b.url, title: b.title, comment: b.comment || '', date_added: b.dateAdded
+    }));
+
     let totalSucceeded = 0;
     let totalFailed = 0;
     setSyncStatus('pushing:0/' + total);
-    for (let i = 0; i < total; i++) {
-        let b = all[i];
-        let item = {url: b.url, title: b.title, comment: b.comment || '', date_added: b.dateAdded};
-        let ok = false;
-        let doneCount = totalSucceeded + totalFailed;
-        for (let retry = 0; retry < 3; retry++) {
-            try {
-                let r = await fetch(url, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({token: token, bookmarks: [item]})
-                });
-                if (r.ok) {
-                    ok = true;
-                    console.log("[%s] sync push (%d/%d): %s", ts(), doneCount + 1, total, b.url);
-                    break;
+
+    const concurrency = 5;
+    let idx = 0;
+
+    async function pushWorker() {
+        while (idx < total) {
+            let i = idx++;
+            let item = items[i];
+            let seq = i + 1;
+            let ok = false;
+            for (let retry = 0; retry < 3; retry++) {
+                try {
+                    let r = await fetch(url, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({token: token, bookmarks: [item]})
+                    });
+                    if (r.ok) {
+                        ok = true;
+                        console.log("[%s] sync push (%d/%d): %s", ts(), seq, total, item.url);
+                        break;
+                    }
+                    console.error("[%s] sync push (%d/%d) failed with status: %s (retry %d): %s", ts(), seq, total, r.status, retry, item.url);
+                    if (r.status === 500 && retry < 2) {
+                        await new Promise(r => setTimeout(r, 2000 * (retry + 1)));
+                        continue;
+                    }
+                } catch (e) {
+                    console.error("[%s] sync push (%d/%d) error: %o (retry %d): %s", ts(), seq, total, e, retry, item.url);
                 }
-                console.error("[%s] sync push (%d/%d) failed with status: %s (retry %d): %s", ts(), doneCount + 1, total, r.status, retry, b.url);
-                if (r.status === 500 && retry < 2) {
-                    await new Promise(r => setTimeout(r, 2000 * (retry + 1)));
-                    continue;
+                if (retry < 2) {
+                    await new Promise(r => setTimeout(r, 1000 * (retry + 1)));
                 }
-            } catch (e) {
-                console.error("[%s] sync push (%d/%d) error: %o (retry %d): %s", ts(), doneCount + 1, total, e, retry, b.url);
             }
-            if (retry < 2) {
-                await new Promise(r => setTimeout(r, 1000 * (retry + 1)));
+            if (ok) {
+                totalSucceeded++;
+            } else {
+                totalFailed++;
             }
+            setSyncStatus('pushing:' + totalSucceeded + '/' + total);
         }
-        if (ok) {
-            totalSucceeded++;
-        } else {
-            totalFailed++;
-        }
-        setSyncStatus('pushing:' + totalSucceeded + '/' + total);
     }
+
+    let workers = [];
+    for (let w = 0; w < Math.min(concurrency, total); w++) {
+        workers.push(pushWorker());
+    }
+    await Promise.all(workers);
+
     console.log("[%s] sync push all done: %d succeeded, %d failed", ts(), totalSucceeded, totalFailed);
     if (totalFailed > 0) {
         setSyncStatus('push_incomplete:' + totalSucceeded + '/' + (totalSucceeded + totalFailed));
@@ -196,11 +215,16 @@ function syncPushBatch(bookmarks) {
         let total = bookmarks.length;
         let succeeded = 0;
         let failed = 0;
-        (async function () {
-            for (let i = 0; i < total; i++) {
+
+        const concurrency = 5;
+        let idx = 0;
+
+        async function worker() {
+            while (idx < total) {
+                let i = idx++;
                 let b = bookmarks[i];
+                let seq = i + 1;
                 let item = {url: b.url, title: b.title, comment: b.comment || '', date_added: b.dateAdded};
-                let doneCount = succeeded + failed;
                 try {
                     let r = await fetch(url, {
                         method: 'POST',
@@ -209,16 +233,24 @@ function syncPushBatch(bookmarks) {
                     });
                     if (r.ok) {
                         succeeded++;
-                        console.log("[%s] sync push (%d/%d): %s", ts(), doneCount + 1, total, b.url);
+                        console.log("[%s] sync push (%d/%d): %s", ts(), seq, total, b.url);
                     } else {
                         failed++;
-                        console.error("[%s] sync push (%d/%d) failed with status: %s: %s", ts(), doneCount + 1, total, r.status, b.url);
+                        console.error("[%s] sync push (%d/%d) failed with status: %s: %s", ts(), seq, total, r.status, b.url);
                     }
                 } catch (e) {
                     failed++;
-                    console.error("[%s] sync push (%d/%d) error: %o: %s", ts(), doneCount + 1, total, e, b.url);
+                    console.error("[%s] sync push (%d/%d) error: %o: %s", ts(), seq, total, e, b.url);
                 }
             }
+        }
+
+        let workers = [];
+        for (let w = 0; w < Math.min(concurrency, total); w++) {
+            workers.push(worker());
+        }
+        (async function () {
+            await Promise.all(workers);
             console.log("[%s] sync push batch done: %d succeeded, %d failed", ts(), succeeded, failed);
         })();
     });
