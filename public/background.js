@@ -131,7 +131,6 @@ function createAndStorePullBookmark(b, parentId) {
 }
 
 async function syncPushAll(endpoint, token) {
-    // 从 IndexedDB 读取所有书签
     let all = await doWithResult(function (store) {
         return new Promise((resolve) => {
             let req = store.getAll();
@@ -140,51 +139,47 @@ async function syncPushAll(endpoint, token) {
         });
     });
     if (!all || !all.length) return;
-    console.log("[%s] sync push all: %d bookmarks", ts(), all.length);
+    let total = all.length;
+    console.log("[%s] sync push all: %d bookmarks", ts(), total);
     let url = endpoint.replace(/\/$/, '') + '/push';
-    let batchSize = 25;
     let totalSucceeded = 0;
     let totalFailed = 0;
-    setSyncStatus('pushing:' + totalSucceeded + '/' + all.length);
-    for (let i = 0; i < all.length; i += batchSize) {
-        let batch = all.slice(i, i + batchSize).map(b => ({
-            url: b.url,
-            title: b.title,
-            comment: b.comment || '',
-            date_added: b.dateAdded
-        }));
+    setSyncStatus('pushing:0/' + total);
+    for (let i = 0; i < total; i++) {
+        let b = all[i];
+        let item = {url: b.url, title: b.title, comment: b.comment || '', date_added: b.dateAdded};
         let ok = false;
+        let doneCount = totalSucceeded + totalFailed;
         for (let retry = 0; retry < 3; retry++) {
             try {
                 let r = await fetch(url, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({token: token, bookmarks: batch})
+                    body: JSON.stringify({token: token, bookmarks: [item]})
                 });
                 if (r.ok) {
                     ok = true;
-                    console.log("[%s] sync push batch[%d] ok (%d bookmarks)", ts(), i / batchSize, batch.length);
+                    console.log("[%s] sync push (%d/%d): %s", ts(), doneCount + 1, total, b.url);
                     break;
                 }
-                console.error("[%s] sync push batch[%d] failed with status: %s (retry %d)", ts(), i / batchSize, r.status, retry);
-                // 服务器过载(500)时多等一会儿
+                console.error("[%s] sync push (%d/%d) failed with status: %s (retry %d): %s", ts(), doneCount + 1, total, r.status, retry, b.url);
                 if (r.status === 500 && retry < 2) {
                     await new Promise(r => setTimeout(r, 2000 * (retry + 1)));
                     continue;
                 }
             } catch (e) {
-                console.error("[%s] sync push batch[%d] error: %o (retry %d)", ts(), i / batchSize, e, retry);
+                console.error("[%s] sync push (%d/%d) error: %o (retry %d): %s", ts(), doneCount + 1, total, e, retry, b.url);
             }
             if (retry < 2) {
                 await new Promise(r => setTimeout(r, 1000 * (retry + 1)));
             }
         }
         if (ok) {
-            totalSucceeded += batch.length;
+            totalSucceeded++;
         } else {
-            totalFailed += batch.length;
+            totalFailed++;
         }
-        setSyncStatus('pushing:' + totalSucceeded + '/' + all.length);
+        setSyncStatus('pushing:' + totalSucceeded + '/' + total);
     }
     console.log("[%s] sync push all done: %d succeeded, %d failed", ts(), totalSucceeded, totalFailed);
     if (totalFailed > 0) {
@@ -198,35 +193,33 @@ function syncPushBatch(bookmarks) {
     chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token'], function (cfg) {
         if (!cfg['sync.enabled'] || !cfg['sync.endpoint'] || !cfg['sync.token']) return;
         let url = cfg['sync.endpoint'].replace(/\/$/, '') + '/push';
-        let batches = [];
-        let batchSize = 100;
-        for (let i = 0; i < bookmarks.length; i += batchSize) {
-            batches.push(bookmarks.slice(i, i + batchSize));
-        }
-        // 串行推送，避免并发过高
+        let total = bookmarks.length;
+        let succeeded = 0;
+        let failed = 0;
         (async function () {
-            for (let batch of batches) {
-                let items = batch.map(b => ({
-                    url: b.url,
-                    title: b.title,
-                    comment: b.comment || '',
-                    date_added: b.dateAdded
-                }));
+            for (let i = 0; i < total; i++) {
+                let b = bookmarks[i];
+                let item = {url: b.url, title: b.title, comment: b.comment || '', date_added: b.dateAdded};
+                let doneCount = succeeded + failed;
                 try {
                     let r = await fetch(url, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({token: cfg['sync.token'], bookmarks: items})
+                        body: JSON.stringify({token: cfg['sync.token'], bookmarks: [item]})
                     });
-                    if (!r.ok) {
-                        console.error("[%s] sync push batch failed: %s", ts(), r.status);
+                    if (r.ok) {
+                        succeeded++;
+                        console.log("[%s] sync push (%d/%d): %s", ts(), doneCount + 1, total, b.url);
                     } else {
-                        console.log("[%s] sync push batch ok (%d bookmarks)", ts(), items.length);
+                        failed++;
+                        console.error("[%s] sync push (%d/%d) failed with status: %s: %s", ts(), doneCount + 1, total, r.status, b.url);
                     }
                 } catch (e) {
-                    console.error("[%s] sync push batch error: %o", ts(), e);
+                    failed++;
+                    console.error("[%s] sync push (%d/%d) error: %o: %s", ts(), doneCount + 1, total, e, b.url);
                 }
             }
+            console.log("[%s] sync push batch done: %d succeeded, %d failed", ts(), succeeded, failed);
         })();
     });
 }
