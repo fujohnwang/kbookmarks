@@ -2,6 +2,15 @@ const kBookmarkFolderName = "kBookmarks"
 const kBookmarkIndexedDBName = "kbookmarksIdb"
 const kBookmarkIdbStoreName = "kbookmarksMetaStore"
 
+// --- Sync Status ---
+function setSyncStatus(status) {
+    chrome.storage.local.set({'sync.status': status});
+}
+
+function clearSyncStatus() {
+    chrome.storage.local.set({'sync.status': null});
+}
+
 // --- Sync ---
 function syncPush(bookmark) {
     chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token'], function (cfg) {
@@ -25,8 +34,12 @@ function syncPush(bookmark) {
 }
 
 function syncPull() {
+    setSyncStatus('pulling');
     chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token', 'sync.last_sync'], function (cfg) {
-        if (!cfg['sync.enabled'] || !cfg['sync.endpoint'] || !cfg['sync.token']) return;
+        if (!cfg['sync.enabled'] || !cfg['sync.endpoint'] || !cfg['sync.token']) {
+            clearSyncStatus();
+            return;
+        }
         let since = cfg['sync.last_sync'] || 0;
         let url = cfg['sync.endpoint'].replace(/\/$/, '') + '/pull';
         fetch(url, {
@@ -41,7 +54,8 @@ function syncPull() {
             if (data.server_time) {
                 chrome.storage.local.set({'sync.last_sync': data.server_time});
             }
-        }).catch(e => console.error("sync pull failed:", e));
+        }).catch(e => console.error("sync pull failed:", e))
+          .finally(() => clearSyncStatus());
     });
 }
 
@@ -94,30 +108,108 @@ function createAndStorePullBookmark(b, parentId) {
     });
 }
 
-function syncPushAll(endpoint, token) {
-    doWith(function (store) {
-        let req = store.getAll();
-        req.onsuccess = () => {
-            let all = req.result;
-            if (!all || !all.length) return;
-            console.log("sync push all: %d bookmarks", all.length);
-            let url = endpoint.replace(/\/$/, '') + '/push';
-            // 分批推送，每批 100 条
-            let batchSize = 100;
-            for (let i = 0; i < all.length; i += batchSize) {
-                let batch = all.slice(i, i + batchSize).map(b => ({
+async function syncPushAll(endpoint, token) {
+    // 从 IndexedDB 读取所有书签
+    let all = await doWithResult(function (store) {
+        return new Promise((resolve) => {
+            let req = store.getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+        });
+    });
+    if (!all || !all.length) return;
+    console.log("sync push all: %d bookmarks", all.length);
+    let url = endpoint.replace(/\/$/, '') + '/push';
+    let batchSize = 100;
+    let totalSucceeded = 0;
+    let totalFailed = 0;
+    setSyncStatus('pushing:' + totalSucceeded + '/' + all.length);
+    for (let i = 0; i < all.length; i += batchSize) {
+        let batch = all.slice(i, i + batchSize).map(b => ({
+            url: b.url,
+            title: b.title,
+            comment: b.comment || '',
+            date_added: b.dateAdded
+        }));
+        let ok = false;
+        for (let retry = 0; retry < 3; retry++) {
+            try {
+                let r = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({token: token, bookmarks: batch})
+                });
+                if (r.ok) {
+                    ok = true;
+                    break;
+                }
+                console.error("sync push batch[%d] failed with status: %s (retry %d)", i / batchSize, r.status, retry);
+            } catch (e) {
+                console.error("sync push batch[%d] error: %o (retry %d)", i / batchSize, e, retry);
+            }
+            if (retry < 2) {
+                await new Promise(r => setTimeout(r, 1000 * (retry + 1)));
+            }
+        }
+        if (ok) {
+            totalSucceeded += batch.length;
+        } else {
+            totalFailed += batch.length;
+        }
+        setSyncStatus('pushing:' + totalSucceeded + '/' + all.length);
+    }
+    console.log("sync push all done: %d succeeded, %d failed", totalSucceeded, totalFailed);
+    clearSyncStatus();
+}
+
+function syncPushBatch(bookmarks) {
+    chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token'], function (cfg) {
+        if (!cfg['sync.enabled'] || !cfg['sync.endpoint'] || !cfg['sync.token']) return;
+        let url = cfg['sync.endpoint'].replace(/\/$/, '') + '/push';
+        let batches = [];
+        let batchSize = 100;
+        for (let i = 0; i < bookmarks.length; i += batchSize) {
+            batches.push(bookmarks.slice(i, i + batchSize));
+        }
+        // 串行推送，避免并发过高
+        (async function () {
+            for (let batch of batches) {
+                let items = batch.map(b => ({
                     url: b.url,
                     title: b.title,
                     comment: b.comment || '',
                     date_added: b.dateAdded
                 }));
-                fetch(url, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({token: token, bookmarks: batch})
-                }).then(r => console.log("sync push batch result:", r.status))
-                  .catch(e => console.error("sync push batch failed:", e));
+                try {
+                    let r = await fetch(url, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({token: cfg['sync.token'], bookmarks: items})
+                    });
+                    if (!r.ok) {
+                        console.error("sync push batch failed:", r.status);
+                    }
+                } catch (e) {
+                    console.error("sync push batch error:", e);
+                }
             }
+        })();
+    });
+}
+
+function doWithResult(callback) {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(kBookmarkIndexedDBName, 1);
+        request.onerror = (event) => {
+            console.error(`Database error at open: ${event.target.errorCode}`);
+            reject(event.target.error);
+        };
+        request.onsuccess = (event) => {
+            const db = event.target.result;
+            const txn = db.transaction(kBookmarkIdbStoreName, 'readwrite');
+            const store = txn.objectStore(kBookmarkIdbStoreName);
+            Promise.resolve(callback(store)).then(resolve).catch(reject);
+            txn.oncomplete = () => db.close();
         };
     });
 }
@@ -283,6 +375,33 @@ chrome.runtime.onMessage.addListener(
         let comment = request.comment;
         let url = request.url;
         let parentFolderId = request.parentFolderId;
+
+        if (request.typ === "sync-force-push") {
+            chrome.storage.local.get(['sync.enabled', 'sync.endpoint', 'sync.token'], function (cfg) {
+                if (!cfg['sync.enabled'] || !cfg['sync.endpoint'] || !cfg['sync.token']) {
+                    sendResponse({status: 'skipped', reason: 'sync not configured'});
+                    return;
+                }
+                setSyncStatus('pushing:0/0');
+                syncPushAll(cfg['sync.endpoint'], cfg['sync.token']);
+                sendResponse({status: 'ok'});
+            });
+            return true;
+        }
+
+        if (request.typ === "sync-now") {
+            setSyncStatus('pulling');
+            syncPull();
+            sendResponse({status: 'ok'});
+            return true;
+        }
+
+        if (request.typ === "sync-status") {
+            chrome.storage.local.get('sync.status', function (cfg) {
+                sendResponse({status: cfg['sync.status'] || null});
+            });
+            return true;
+        }
 
         if (request.typ === "sync-config") {
             setupSyncAlarm(request.enabled);
@@ -493,6 +612,8 @@ chrome.runtime.onMessage.addListener(
                     pending--;
                     if (pending === 0) {
                         sendResponse({status: 'OK', added: added, updated: updated});
+                        // 导入完成后推送到同步服务器
+                        syncPushBatch(bookmarks);
                     }
                 }
 
