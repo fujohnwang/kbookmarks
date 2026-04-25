@@ -26,7 +26,7 @@
         chrome.runtime.sendMessage({typ: 'sync-status'}).then(r => {
             syncStatusText = statusDisplayText(r.status);
             if (r.status) {
-                statusPollTimer = setTimeout(pollSyncStatus, 1000);
+                statusPollTimer = setTimeout(pollSyncStatus, 300);
             } else {
                 syncNowRunning = false;
                 syncResyncing = false;
