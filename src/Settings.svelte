@@ -2,7 +2,7 @@
     import {link} from 'svelte-spa-router';
     import {push, pop, replace} from 'svelte-spa-router';
     import LeafFolderIcon from "./tree/LeafFolderIcon.svelte";
-    import {onMount} from 'svelte';
+    import {onMount, onDestroy} from 'svelte';
 
     import {showSaveFolder, saveFolder, refreshBookmarkCount} from "./repo";
 
@@ -17,6 +17,33 @@
     let syncSaving = false;
     let syncTesting = false;
     let syncTestResult = ''; // 'ok' | 'fail' | ''
+    let syncResyncing = false;
+    let syncNowRunning = false;
+    let syncStatusText = '';
+    let statusPollTimer;
+
+    function pollSyncStatus() {
+        chrome.runtime.sendMessage({typ: 'sync-status'}).then(r => {
+            syncStatusText = statusDisplayText(r.status);
+            if (r.status) {
+                statusPollTimer = setTimeout(pollSyncStatus, 1000);
+            } else {
+                syncNowRunning = false;
+                syncResyncing = false;
+                syncStatusText = '';
+            }
+        }).catch(() => {});
+    }
+
+    function statusDisplayText(status) {
+        if (!status) return '';
+        if (status === 'pulling') return 'Pulling bookmarks from server';
+        if (status.startsWith('pushing:')) {
+            let parts = status.split(':')[1].split('/');
+            return 'Pushing bookmarks to server (' + parts[0] + '/' + parts[1] + ')';
+        }
+        return '';
+    }
 
     function flashSuccess() {
         showSuccess = true;
@@ -72,6 +99,32 @@
         }
         syncTesting = false;
         setTimeout(() => syncTestResult = '', 3000);
+    }
+
+    async function resyncFull() {
+        syncResyncing = true;
+        try {
+            await chrome.runtime.sendMessage({
+                typ: 'sync-force-push',
+            });
+            pollSyncStatus();
+        } catch (e) {
+            console.error('resync failed:', e);
+            syncResyncing = false;
+        }
+    }
+
+    async function syncNow() {
+        syncNowRunning = true;
+        try {
+            await chrome.runtime.sendMessage({
+                typ: 'sync-now',
+            });
+            pollSyncStatus();
+        } catch (e) {
+            console.error('sync now failed:', e);
+            syncNowRunning = false;
+        }
     }
 
     function onSyncToggle() {
@@ -187,6 +240,22 @@
 
     onMount(async () => {
         loadSyncConfig();
+        // 检测是否有中断的同步操作，仅展示状态，不自动重启
+        try {
+            let r = await chrome.runtime.sendMessage({typ: 'sync-status'});
+            if (r.status) {
+                if (r.status.startsWith('pushing:')) {
+                    syncResyncing = true;
+                } else if (r.status === 'pulling') {
+                    syncNowRunning = true;
+                }
+                pollSyncStatus();
+            }
+        } catch (e) {}
+    })
+
+    onDestroy(() => {
+        if (statusPollTimer) clearTimeout(statusPollTimer);
     })
 
 </script>
@@ -287,27 +356,44 @@
                            class="input input-bordered input-sm w-full"
                            bind:value={syncToken}/>
                 </div>
-                <div class="flex items-center space-x-2 mt-2">
-                    <button class="btn btn-sm btn-outline" disabled={syncSaving || !syncEndpoint || !syncToken}
-                            on:click={saveSyncConfig}>
-                        {#if syncSaving}Saving...{:else}Save{/if}
-                    </button>
-                    <button class="btn btn-sm btn-outline" disabled={syncTesting || !syncEndpoint || !syncToken}
-                            on:click={testSyncConnection}>
-                        {#if syncTesting}Testing...{:else}Test Connection{/if}
-                    </button>
-                    {#if syncTestResult === 'ok'}
-                        <svg class="h-5 w-5 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 13l4 4L19 7" class="check-draw"/>
-                        </svg>
-                    {:else if syncTestResult === 'fail'}
-                        <svg class="h-5 w-5 text-error" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    {/if}
+                <div class="flex justify-between items-center mt-2">
+                    <div class="flex items-center space-x-2">
+                        <button class="btn btn-sm btn-outline" disabled={syncSaving || !syncEndpoint || !syncToken}
+                                on:click={saveSyncConfig}>
+                            {#if syncSaving}Saving...{:else}Save{/if}
+                        </button>
+                        <button class="btn btn-sm btn-outline" disabled={syncTesting || !syncEndpoint || !syncToken}
+                                on:click={testSyncConnection}>
+                            {#if syncTesting}Testing...{:else}Test Connection{/if}
+                        </button>
+                        {#if syncTestResult === 'ok'}
+                            <svg class="h-5 w-5 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 13l4 4L19 7" class="check-draw"/>
+                            </svg>
+                        {:else if syncTestResult === 'fail'}
+                            <svg class="h-5 w-5 text-error" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        {/if}
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="btn btn-sm btn-outline" disabled={syncResyncing}
+                                on:click={resyncFull}>
+                            {#if syncResyncing}Resyncing...{:else}Full Resync{/if}
+                        </button>
+                        <button class="btn btn-sm btn-outline" disabled={syncNowRunning}
+                                on:click={syncNow}>
+                            {#if syncNowRunning}Syncing...{:else}Sync Now{/if}
+                        </button>
+                    </div>
                 </div>
+                {#if syncStatusText}
+                    <div class="text-xs text-info mt-1">
+                        {syncStatusText}<span class="animate-dots">...</span>
+                    </div>
+                {/if}
             </div>
         {/if}
     </div>
@@ -336,5 +422,19 @@
         to {
             stroke-dashoffset: 0;
         }
+    }
+    .animate-dots {
+        display: inline-block;
+        overflow: hidden;
+        vertical-align: bottom;
+        max-width: 0;
+        animation: dot-cycle 1.5s steps(4, end) infinite;
+    }
+    @keyframes dot-cycle {
+        0% { max-width: 0; }
+        25% { max-width: 1ch; }
+        50% { max-width: 2ch; }
+        75% { max-width: 3ch; }
+        100% { max-width: 0; }
     }
 </style>
