@@ -2,6 +2,10 @@ const kBookmarkFolderName = "kBookmarks"
 const kBookmarkIndexedDBName = "kbookmarksIdb"
 const kBookmarkIdbStoreName = "kbookmarksMetaStore"
 
+function ts() {
+    return new Date().toLocaleString();
+}
+
 // --- Sync Status ---
 function setSyncStatus(status) {
     chrome.storage.local.set({'sync.status': status});
@@ -28,8 +32,8 @@ function syncPush(bookmark) {
                     date_added: bookmark.dateAdded
                 }]
             })
-        }).then(r => console.log("sync push result:", r.status))
-          .catch(e => console.error("sync push failed:", e));
+        }).then(r => console.log("[%s] sync push result: %s", ts(), r.status))
+          .catch(e => console.error("[%s] sync push failed: %o", ts(), e));
     });
 }
 
@@ -48,13 +52,15 @@ function syncPull() {
             body: JSON.stringify({token: cfg['sync.token'], since: since})
         }).then(r => r.json()).then(data => {
             if (data.bookmarks && data.bookmarks.length) {
-                console.log("sync pull: received %d bookmarks", data.bookmarks.length);
+                console.log("[%s] sync pull: received %d bookmarks", ts(), data.bookmarks.length);
                 processSyncPull(data.bookmarks);
+            } else {
+                console.log("[%s] sync pull: no new bookmarks", ts());
             }
             if (data.server_time) {
                 chrome.storage.local.set({'sync.last_sync': data.server_time});
             }
-        }).catch(e => console.error("sync pull failed:", e))
+        }).catch(e => console.error("[%s] sync pull failed: %o", ts(), e))
           .finally(() => clearSyncStatus());
     });
 }
@@ -118,9 +124,9 @@ async function syncPushAll(endpoint, token) {
         });
     });
     if (!all || !all.length) return;
-    console.log("sync push all: %d bookmarks", all.length);
+    console.log("[%s] sync push all: %d bookmarks", ts(), all.length);
     let url = endpoint.replace(/\/$/, '') + '/push';
-    let batchSize = 100;
+    let batchSize = 25;
     let totalSucceeded = 0;
     let totalFailed = 0;
     setSyncStatus('pushing:' + totalSucceeded + '/' + all.length);
@@ -143,9 +149,14 @@ async function syncPushAll(endpoint, token) {
                     ok = true;
                     break;
                 }
-                console.error("sync push batch[%d] failed with status: %s (retry %d)", i / batchSize, r.status, retry);
+                console.error("[%s] sync push batch[%d] failed with status: %s (retry %d)", ts(), i / batchSize, r.status, retry);
+                // 服务器过载(500)时多等一会儿
+                if (r.status === 500 && retry < 2) {
+                    await new Promise(r => setTimeout(r, 2000 * (retry + 1)));
+                    continue;
+                }
             } catch (e) {
-                console.error("sync push batch[%d] error: %o (retry %d)", i / batchSize, e, retry);
+                console.error("[%s] sync push batch[%d] error: %o (retry %d)", ts(), i / batchSize, e, retry);
             }
             if (retry < 2) {
                 await new Promise(r => setTimeout(r, 1000 * (retry + 1)));
@@ -158,8 +169,12 @@ async function syncPushAll(endpoint, token) {
         }
         setSyncStatus('pushing:' + totalSucceeded + '/' + all.length);
     }
-    console.log("sync push all done: %d succeeded, %d failed", totalSucceeded, totalFailed);
-    clearSyncStatus();
+    console.log("[%s] sync push all done: %d succeeded, %d failed", ts(), totalSucceeded, totalFailed);
+    if (totalFailed > 0) {
+        setSyncStatus('push_incomplete:' + totalSucceeded + '/' + (totalSucceeded + totalFailed));
+    } else {
+        clearSyncStatus();
+    }
 }
 
 function syncPushBatch(bookmarks) {
@@ -187,10 +202,10 @@ function syncPushBatch(bookmarks) {
                         body: JSON.stringify({token: cfg['sync.token'], bookmarks: items})
                     });
                     if (!r.ok) {
-                        console.error("sync push batch failed:", r.status);
+                        console.error("[%s] sync push batch failed: %s", ts(), r.status);
                     }
                 } catch (e) {
-                    console.error("sync push batch error:", e);
+                    console.error("[%s] sync push batch error: %o", ts(), e);
                 }
             }
         })();
@@ -224,10 +239,10 @@ chrome.alarms.onAlarm.addListener(function (alarm) {
 function setupSyncAlarm(enabled) {
     if (enabled) {
         chrome.alarms.create('kbookmark-sync-pull', {periodInMinutes: 5});
-        console.log("sync alarm created (every 5 min)");
+        console.log("[%s] sync alarm created (every 5 min)", ts());
     } else {
         chrome.alarms.clear('kbookmark-sync-pull');
-        console.log("sync alarm cleared");
+        console.log("[%s] sync alarm cleared", ts());
     }
 }
 

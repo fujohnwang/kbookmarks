@@ -25,12 +25,11 @@
     function pollSyncStatus() {
         chrome.runtime.sendMessage({typ: 'sync-status'}).then(r => {
             syncStatusText = statusDisplayText(r.status);
-            if (r.status) {
+            if (r.status && !r.status.startsWith('push_incomplete:')) {
                 statusPollTimer = setTimeout(pollSyncStatus, 300);
             } else {
                 syncNowRunning = false;
                 syncResyncing = false;
-                syncStatusText = '';
             }
         }).catch(() => {});
     }
@@ -38,6 +37,10 @@
     function statusDisplayText(status) {
         if (!status) return '';
         if (status === 'pulling') return 'Pulling bookmarks from server';
+        if (status.startsWith('push_incomplete:')) {
+            let parts = status.split(':')[1].split('/');
+            return 'Push incomplete (' + parts[0] + '/' + parts[1] + ') - click Full Resync to retry';
+        }
         if (status.startsWith('pushing:')) {
             let parts = status.split(':')[1].split('/');
             return 'Pushing bookmarks to server (' + parts[0] + '/' + parts[1] + ')';
@@ -75,6 +78,10 @@
             }).then(() => {
                 syncSaving = false;
                 flashSuccess();
+                if (syncEnabled) {
+                    syncResyncing = true;
+                    pollSyncStatus();
+                }
             }).catch(() => {
                 syncSaving = false;
             });
@@ -246,10 +253,13 @@
             if (r.status) {
                 if (r.status.startsWith('pushing:')) {
                     syncResyncing = true;
+                    pollSyncStatus();
+                } else if (r.status.startsWith('push_incomplete:')) {
+                    syncStatusText = statusDisplayText(r.status);
                 } else if (r.status === 'pulling') {
                     syncNowRunning = true;
+                    pollSyncStatus();
                 }
-                pollSyncStatus();
             }
         } catch (e) {}
     })
