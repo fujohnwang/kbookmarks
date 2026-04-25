@@ -443,6 +443,7 @@ chrome.runtime.onMessage.addListener(
                 // 首次同步：全量 push 本地数据到服务端，然后 pull
                 chrome.storage.local.get(['sync.last_sync'], function (cfg) {
                     if (!cfg['sync.last_sync']) {
+                        setSyncStatus('pushing:0/0');
                         syncPushAll(request.endpoint, request.token);
                     }
                     syncPull();
