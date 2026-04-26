@@ -6,6 +6,13 @@ set -euo pipefail
 VERSION="$1"
 FILE="package.json"
 
+# 正则表达式：以数字开头，中间两个点分隔数字，以数字结尾
+# 注意：在 Bash 的 =~ 右侧，正则表达式不要加双引号，否则会被当成普通字符串匹配！
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "错误: VERSION '$VERSION' 格式不正确！必须是类似 '1.2.2' 的格式, v1.2.3这样的格式是适用于git tag场景，发布的版本号不能带其他前缀。"
+    exit 1
+fi
+
 # 更新 version
 sed -i.bak 's/"version": *"[^"]*"/"version": "'"$VERSION"'"/' "$FILE" && rm "${FILE}.bak"
 
